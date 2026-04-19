@@ -4,7 +4,7 @@
 
 This document describes the requirements for a React frontend application for administering employees, customers, license types, customer tags, and change history.
 
-There is also a **reference-project** in the project, which can and should be used as a base. The following parts may be copied directly from `reference-project`:
+There is also a **reference-project** in repository https://github.com/sanasaryank/Customer-configuration-portal.git, which can and should be used as a base. The following parts may be copied directly from `reference-project`:
 
 - `Login`
 - `CustomerTags`
@@ -232,6 +232,9 @@ The filter must be a separate collapsible component:
 
 ---
 
+##Base url
+the base url is https://license.trio.am
+---
 ## 7. Auth flow
 
 ### 7.1 Login
