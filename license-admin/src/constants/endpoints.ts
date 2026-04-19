@@ -1,0 +1,14 @@
+export const API_BASE = import.meta.env.VITE_API_BASE_URL ?? '';
+
+export const ENDPOINTS = {
+  LOGIN:         '/login',
+  LOGOUT:        '/logout',
+  ME:            '/me',
+  EMPLOYEES:     '/employees',
+  CUSTOMER_TAGS: '/customerTags',
+  LICENSE_TYPES: '/licenseTypes',
+  CUSTOMERS:     '/customers',
+  HISTORY:       '/history',
+  HISTORY_ITEM:  '/historyItem',
+  VALIDATORS:    '/validators',
+} as const;

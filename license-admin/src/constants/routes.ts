@@ -1,0 +1,11 @@
+export const ROUTES = {
+  LOGIN: '/login',
+  CUSTOMERS: '/customers',
+  DICTIONARIES_EMPLOYEES: '/dictionaries/employees',
+  DICTIONARIES_CUSTOMER_TAGS: '/dictionaries/customertags',
+  DICTIONARIES_LICENSE_TYPES: '/dictionaries/licensetypes',
+  HISTORY: '/history',
+  DICTIONARIES_VALIDATORS: '/dictionaries/validators',
+} as const;
+
+export type RouteValue = (typeof ROUTES)[keyof typeof ROUTES];

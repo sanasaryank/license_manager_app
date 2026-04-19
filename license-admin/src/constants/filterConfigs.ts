@@ -1,0 +1,48 @@
+import { ROUTES } from './routes';
+
+export interface FilterOption {
+  value: string;
+  label?: string;
+  labelKey: string;
+}
+
+export type FilterFieldType = 'text' | 'date' | 'switch' | 'select';
+
+export interface FilterFieldConfig {
+  key: string;
+  labelKey: string;
+  type?: FilterFieldType;
+  staticOptions?: FilterOption[];
+}
+
+const STATUS_SWITCH: FilterFieldConfig = {
+  key: 'isBlocked',
+  labelKey: 'common.status',
+  type: 'switch',
+};
+
+export const FILTER_CONFIGS: Record<string, FilterFieldConfig[]> = {
+  [ROUTES.CUSTOMERS]: [
+    { key: 'name',            labelKey: 'common.name',              type: 'text' },
+    { key: 'responsibleName', labelKey: 'customers.responsible',    type: 'text' },
+    { key: 'licenseTypeId',   labelKey: 'customers.licenseType',    type: 'select' },
+    { key: 'tag',             labelKey: 'customers.tags',           type: 'select' },
+    { key: 'TIN',             labelKey: 'customers.tin',            type: 'text' },
+    STATUS_SWITCH,
+  ],
+  [ROUTES.HISTORY]: [
+    { key: 'dateFrom',   labelKey: 'history.dateFrom',   type: 'date' },
+    { key: 'dateTo',     labelKey: 'history.dateTo',     type: 'date' },
+    { key: 'userName',   labelKey: 'history.user',       type: 'select' },
+    { key: 'objectType', labelKey: 'history.objectType', type: 'text' },
+    { key: 'objectId',   labelKey: 'history.objectId',   type: 'text' },
+    {
+      key: 'actionType', labelKey: 'history.actionType', type: 'select',
+      staticOptions: [
+        { value: 'create', labelKey: 'History.actionType.create' },
+        { value: 'edit',   labelKey: 'History.actionType.edit' },
+        { value: 'delete', labelKey: 'History.actionType.delete' },
+      ],
+    },
+  ],
+};
