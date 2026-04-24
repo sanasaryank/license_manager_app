@@ -49,17 +49,13 @@ async function handleResponse<T>(res: Response, skipRedirect = false): Promise<T
   return JSON.parse(text) as T;
 }
 
-const isLocalhost =
-  typeof window !== 'undefined' &&
-  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-
-const originHeaders: HeadersInit = isLocalhost
-  ? { 'X-Origin': new URL(API_BASE).hostname }
+const debugHeaders: Record<string, string> = import.meta.env.DEV
+  ? { 'X-Origin': 'license.trio.am' }
   : {};
 
 const defaultHeaders: HeadersInit = {
   'Content-Type': 'application/json',
-  ...originHeaders,
+  ...debugHeaders,
 };
 
 export async function get<T>(path: string, skipRedirect = false): Promise<T> {
@@ -78,7 +74,7 @@ export async function postWithHeaders<T>(
   const res = await fetch(`${API_BASE}${path}`, {
     method: 'POST',
     credentials: 'include',
-    headers: { ...originHeaders, ...headers },
+    headers: { ...debugHeaders, ...headers },
   });
   return handleResponse<T>(res);
 }

@@ -3,7 +3,6 @@ import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { FILTER_CONFIGS } from '../../constants/filterConfigs';
 import { useFilterValues, useSetFilterValue, useResetFilters, useFilterOptions } from '../../providers/FilterProvider';
-import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
 import { Checkbox } from '../ui/Checkbox';

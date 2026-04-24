@@ -30,12 +30,16 @@ export function useAuth(): AuthContextValue {
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<CurrentUser | null>(null);
+  // initialized stays false until the bootstrap /me query settles (success or error).
+  // This prevents ProtectedRoute from checking auth while user state is still syncing
+  // from the query result — avoiding a spurious redirect to /login on page refresh.
+  const [initialized, setInitialized] = useState(false);
   const [lang, setLangState] = useState<LangCode>(() => {
     const stored = localStorage.getItem(LANG_STORAGE_KEY) as LangCode | null;
     return stored ?? DEFAULT_LANG;
   });
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: queryKeys.me,
     queryFn: getMe,
     retry: false,
@@ -43,18 +47,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     meta: { silent: true },
   });
 
+  // Single effect: once the query settles (isLoading→false), sync user and mark initialized.
+  // Both setUser and setInitialized are batched into one re-render by React 18.
   useEffect(() => {
-    if (data) setUser(data);
-  }, [data]);
+    if (!isLoading) {
+      setUser(data ?? null);
+      setInitialized(true);
+    }
+  }, [isLoading, data]);
 
-  useEffect(() => {
-    if (isError) setUser(null);
-  }, [isError]);
-
-  // Register clear session callback (e.g. on 401)
+  // Register clear session callback (e.g. on 401 from any request)
   useEffect(() => {
     registerClearSession(() => setUser(null));
-  }, []);
+  }, []);;
 
   const setLang = useCallback((newLang: LangCode) => {
     setLangState(newLang);
@@ -68,8 +73,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const value = useMemo(
-    () => ({ user, setUser, isAuthenticated: !!user, isLoading, lang, setLang }),
-    [user, isLoading, lang, setLang],
+    () => ({ user, setUser, isAuthenticated: !!user, isLoading: !initialized, lang, setLang }),
+    [user, initialized, lang, setLang],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

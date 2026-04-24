@@ -4,14 +4,17 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Checkbox } from '../ui/Checkbox';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { TranslationEditor } from './TranslationEditor';
 import { IconPlus, IconTrash } from '../ui/Icons';
+import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 
 /** Manages the `items` field array of a Customer Tag form */
 export function TagItemsEditor() {
   const { t } = useTranslation();
   const { register, control, formState: { errors } } = useFormContext();
   const { fields, append, remove } = useFieldArray({ control, name: 'items' });
+  const confirmItem = useConfirmDialog();
 
   return (
     <div className="flex flex-col gap-4">
@@ -22,7 +25,7 @@ export function TagItemsEditor() {
           <div key={field.id} className="rounded-md border p-4 relative">
             <button
               type="button"
-              onClick={() => remove(index)}
+              onClick={() => confirmItem.requestConfirm(async () => remove(index))}
               className="absolute right-3 top-3 text-gray-400 hover:text-red-500"
               title={t('common.remove')}
             >
@@ -62,6 +65,13 @@ export function TagItemsEditor() {
       >
         {t('customerTags.addItem')}
       </Button>
+      <ConfirmDialog
+        open={confirmItem.isOpen}
+        title={t('common.deleteTitle')}
+        message={t('common.confirmDelete')}
+        onConfirm={confirmItem.confirm}
+        onCancel={confirmItem.close}
+      />
     </div>
   );
 }

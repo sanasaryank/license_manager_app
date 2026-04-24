@@ -23,11 +23,11 @@ const STATUS_SWITCH: FilterFieldConfig = {
 
 export const FILTER_CONFIGS: Record<string, FilterFieldConfig[]> = {
   [ROUTES.CUSTOMERS]: [
-    { key: 'name',            labelKey: 'common.name',              type: 'text' },
-    { key: 'responsibleName', labelKey: 'customers.responsible',    type: 'text' },
-    { key: 'licenseTypeId',   labelKey: 'customers.licenseType',    type: 'select' },
-    { key: 'tag',             labelKey: 'customers.tags',           type: 'select' },
-    { key: 'TIN',             labelKey: 'customers.tin',            type: 'text' },
+    { key: 'name',          labelKey: 'common.name',           type: 'text' },
+    { key: 'responsibleId', labelKey: 'customers.responsible', type: 'select' },
+    { key: 'licenseTypeId', labelKey: 'customers.licenseType', type: 'select' },
+    { key: 'tag',           labelKey: 'customers.tags',        type: 'select' },
+    { key: 'TIN',           labelKey: 'customers.tin',         type: 'text' },
     STATUS_SWITCH,
   ],
   [ROUTES.HISTORY]: [

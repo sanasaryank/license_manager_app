@@ -9,6 +9,7 @@ import type { LangCode } from '../../types/common';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { ErrorBanner } from '../../components/ui/ErrorBanner';
+import { IconEye, IconEyeOff } from '../../components/ui/Icons';
 
 export default function LoginPage() {
   const { t } = useTranslation();
@@ -65,8 +66,9 @@ export default function LoginPage() {
               onClick={() => setShowPassword((s) => !s)}
               className="absolute right-3 top-8 text-gray-400 hover:text-gray-600 focus:outline-none"
               tabIndex={-1}
+              aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
             >
-              {showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
+              {showPassword ? <IconEyeOff /> : <IconEye />}
             </button>
           </div>
 

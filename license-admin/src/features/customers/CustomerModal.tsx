@@ -8,6 +8,7 @@ import { queryKeys } from '../../queryKeys';
 import { getCustomer, createCustomer, updateCustomer } from '../../api/customers';
 import { getEmployees } from '../../api/employees';
 import { buildDiffPayload } from '../../api/diffPayload';
+import { TranslationEditor } from '../../components/form/TranslationEditor';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
@@ -26,6 +27,12 @@ import type { LicenseTypeListItem } from '../../types/licenseType';
 import type { CustomerTagListItem } from '../../types/customerTag';
 import { LicenseCard } from './LicenseCard';
 
+const translationSchema = z.object({
+  ARM: z.string().default(''),
+  ENG: z.string().default(''),
+  RUS: z.string().default(''),
+});
+
 const licenseSchema = z.object({
   licenseTypeId: z.string().optional().default(''),
   OrgName: z.string().optional().default(''),
@@ -35,11 +42,12 @@ const licenseSchema = z.object({
   isBlocked: z.boolean().default(false),
   description: z.string().optional().default(''),
   values: z.record(z.unknown()).default({}),
+  endDate: z.string().optional().default(''),
 });
 
 const schema = z.object({
   id: z.string().min(1, 'Required'),
-  name: z.string().min(1, 'Required'),
+  name: translationSchema,
   legalName: z.string().optional().default(''),
   TIN: z.string().optional().default(''),
   responsibleId: z.string().optional().default(''),
@@ -80,7 +88,7 @@ export function CustomerModal({ open, onClose, editId, licenseTypes, allTags }: 
     resolver: zodResolver(schema),
     defaultValues: {
       id: '',
-      name: '',
+      name: { ARM: '', ENG: '', RUS: '' },
       legalName: '',
       TIN: '',
       responsibleId: '',
@@ -215,12 +223,7 @@ export function CustomerModal({ open, onClose, editId, licenseTypes, allTags }: 
                         {...register('id')}
                         error={errors.id?.message}
                       />
-                      <Input
-                        label={t('customers.name')}
-                        required
-                        {...register('name')}
-                        error={errors.name?.message}
-                      />
+                      <TranslationEditor prefix="name" label={t('customers.name')} required />
                       <Input label={t('customers.legalName')} {...register('legalName')} />
                       <Input label={t('customers.tin')} {...register('TIN')} />
                       <Select
@@ -289,6 +292,7 @@ export function CustomerModal({ open, onClose, editId, licenseTypes, allTags }: 
                             isBlocked: false,
                             description: '',
                             values: {},
+                            endDate: '',
                           })
                         }
                       >

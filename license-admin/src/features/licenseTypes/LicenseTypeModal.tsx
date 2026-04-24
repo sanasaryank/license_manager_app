@@ -8,6 +8,7 @@ import { queryKeys } from '../../queryKeys';
 import { getLicenseType, createLicenseType, updateLicenseType } from '../../api/licenseTypes';
 import { buildDiffPayload } from '../../api/diffPayload';
 import { TranslationEditor } from '../../components/form/TranslationEditor';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
@@ -18,6 +19,7 @@ import { ErrorBanner } from '../../components/ui/ErrorBanner';
 import { Spinner } from '../../components/ui/Spinner';
 import { IconPlus, IconTrash } from '../../components/ui/Icons';
 import { useFormError } from '../../hooks/useFormError';
+import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 import type { LicenseFieldKind } from '../../types/licenseType';
 
 const FIELD_KINDS: LicenseFieldKind[] = ['string', 'int', 'float', 'date', 'datetime', 'time', 'boolean'];
@@ -72,6 +74,7 @@ export function LicenseTypeModal({ open, onClose, editId }: Props) {
 
   const [mutationError, setMutationError] = React.useState<unknown>(null);
   const { errorMessage } = useFormError(mutationError);
+  const confirmField = useConfirmDialog();
 
   const onSubmit = async (values: FormValues) => {
     setMutationError(null);
@@ -146,7 +149,9 @@ export function LicenseTypeModal({ open, onClose, editId }: Props) {
                   <div key={field.id} className="relative rounded-md border p-4">
                     <button
                       type="button"
-                      onClick={() => remove(index)}
+                      onClick={() =>
+                        confirmField.requestConfirm(async () => remove(index))
+                      }
                       className="absolute right-3 top-3 text-gray-400 hover:text-red-500"
                     >
                       <IconTrash className="h-4 w-4" />
@@ -191,6 +196,13 @@ export function LicenseTypeModal({ open, onClose, editId }: Props) {
           </form>
         </FormProvider>
       )}
+      <ConfirmDialog
+        open={confirmField.isOpen}
+        title={t('common.deleteTitle')}
+        message={t('common.confirmDelete')}
+        onConfirm={confirmField.confirm}
+        onCancel={confirmField.close}
+      />
     </Modal>
   );
 }

@@ -6,11 +6,13 @@ import { queryKeys } from '../../queryKeys';
 import { getCustomers, updateCustomer } from '../../api/customers';
 import { getLicenseTypes } from '../../api/licenseTypes';
 import { getCustomerTags } from '../../api/customerTags';
+import { getEmployees } from '../../api/employees';
 import { useListOperations } from '../../hooks/useListOperations';
 import { useBlockToggle } from '../../hooks/useBlockToggle';
 import { useAuth } from '../../providers/AuthProvider';
 import { useFilterValues, useRegisterFilterOptions } from '../../providers/FilterProvider';
 import { resolveTranslation } from '../../utils/translation';
+import { formatDate, formatDateTime, getCustomerMinEndDate, localTodayString } from '../../utils/timestamp';
 import { Table } from '../../components/ui/Table';
 import { Pagination } from '../../components/ui/Pagination';
 import { Button } from '../../components/ui/Button';
@@ -44,6 +46,20 @@ export default function CustomersPage() {
     queryFn: getCustomerTags,
   });
 
+  const { data: employees = [] } = useQuery({
+    queryKey: queryKeys.employees.all,
+    queryFn: getEmployees,
+  });
+
+  // Build employeeId → display name map
+  const employeeMap = React.useMemo(
+    () => new Map(employees.map((e) => [e.id, resolveTranslation(e.name, lang)])),
+    [employees, lang],
+  );
+
+  const resolveResponsible = (c: CustomerListItem) =>
+    c.responsibleName || employeeMap.get(c.responsibleId) || c.responsibleId || '—';
+
   const registerFilterOptions = useRegisterFilterOptions();
   const filterValues = useFilterValues();
 
@@ -54,6 +70,14 @@ export default function CustomersPage() {
       licenseTypes.map((lt) => ({ value: lt.id, label: resolveTranslation(lt.name, lang) })),
     );
   }, [licenseTypes, lang, registerFilterOptions]);
+
+  // Register responsible (employee) options for filter panel
+  React.useEffect(() => {
+    registerFilterOptions(
+      'responsibleId',
+      employees.map((e) => ({ value: e.id, label: resolveTranslation(e.name, lang) })),
+    );
+  }, [employees, lang, registerFilterOptions]);
 
   // Register tag item options
   React.useEffect(() => {
@@ -71,8 +95,8 @@ export default function CustomersPage() {
   const [editId, setEditId] = useState<string | null>(null);
 
   const filterFields = [
-    { key: 'name', extract: (c: CustomerListItem) => c.name, matchMode: 'contains' as const },
-    { key: 'responsibleName', extract: (c: CustomerListItem) => c.responsibleName ?? '' },
+    { key: 'name', extract: (c: CustomerListItem) => resolveTranslation(c.name, lang), matchMode: 'contains' as const },
+    { key: 'responsibleId', extract: (c: CustomerListItem) => c.responsibleId ?? '', matchMode: 'exact' as const },
     { key: 'licenseTypeId', extract: (c: CustomerListItem) => (c.licenses ?? []).map((l) => l.licenseTypeId).join(','), matchMode: 'array' as const },
     { key: 'tag', extract: (c: CustomerListItem) => (c.tags ?? []).join(','), matchMode: 'array' as const },
     { key: 'TIN', extract: (c: CustomerListItem) => c.TIN ?? '' },
@@ -81,11 +105,16 @@ export default function CustomersPage() {
 
   const listOps = useListOperations<CustomerListItem>({
     data: customers,
-    searchFields: (c) => [c.name, c.legalName ?? '', c.TIN ?? ''],
+    searchFields: (c) => [resolveTranslation(c.name, lang), c.legalName ?? '', c.TIN ?? ''],
     externalSearch: search,
     filterFields,
     externalFilters: filterValues,
     defaultSort: { key: 'name', direction: 'asc' },
+    sortFields: {
+      name: (c) => resolveTranslation(c.name, lang),
+      minEndDate: (c) => getCustomerMinEndDate(c.licenses ?? []) ?? '9999-12-31',
+      lastUpdated: (c) => c.lastUpdated ?? '',
+    },
   });
 
   const blockToggle = useBlockToggle({
@@ -94,12 +123,12 @@ export default function CustomersPage() {
   });
 
   const columns = [
-    { key: 'name', header: t('customers.name'), sortable: true },
+    { key: 'name', header: t('customers.name'), sortable: true, render: (c: CustomerListItem) => resolveTranslation(c.name, lang) },
     {
       key: 'responsible',
       header: t('customers.responsible'),
       sortable: true,
-      render: (c: CustomerListItem) => c.responsibleName || '—',
+      render: (c: CustomerListItem) => resolveResponsible(c),
     },
     {
       key: 'licenses',
@@ -126,6 +155,29 @@ export default function CustomersPage() {
         ) : (
           <Badge variant="success">{t('common.active')}</Badge>
         ),
+    },
+    {
+      key: 'lastUpdated',
+      header: t('customers.lastChangeDate'),
+      sortable: true,
+      render: (c: CustomerListItem) => c.lastUpdated ? formatDateTime(c.lastUpdated) : '—',
+    },
+    {
+      key: 'minEndDate',
+      header: t('customers.minEndDate'),
+      sortable: true,
+      render: (c: CustomerListItem) => {
+        const d = getCustomerMinEndDate(c.licenses ?? []);
+        if (!d) return <span>—</span>;
+        const today = localTodayString();
+        const soon = localTodayString(7);
+        const color = d < today
+          ? 'text-red-900 font-semibold'
+          : d < soon
+          ? 'text-red-500'
+          : '';
+        return <span className={color}>{formatDate(d)}</span>;
+      },
     },
     {
       key: 'actions',

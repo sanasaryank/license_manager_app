@@ -1,3 +1,5 @@
+import type { Translation } from './common';
+
 export interface CustomerLicense {
   OrgName: string;
   MaxConnCount: number;
@@ -7,19 +9,21 @@ export interface CustomerLicense {
   values: Record<string, unknown>;
   isBlocked: boolean;
   description: string;
+  endDate?: string;
 }
 
 export interface CustomerListItem {
   id: string;
-  name: string;
+  name: Translation;
   legalName: string;
   TIN: string;
   responsibleId: string;
-  responsibleName: string;
+  responsibleName?: string;
   tags: string[];
   licenses: CustomerLicense[];
   isBlocked: boolean;
   description: string;
+  lastUpdated?: string;
 }
 
 export interface CustomerDetail extends CustomerListItem {
@@ -28,7 +32,7 @@ export interface CustomerDetail extends CustomerListItem {
 
 export interface CustomerCreatePayload {
   id: string;
-  name: string;
+  name: Translation;
   legalName: string;
   TIN: string;
   responsibleId: string;
@@ -41,7 +45,7 @@ export interface CustomerCreatePayload {
 export interface CustomerUpdatePayload {
   id: string;
   hash?: string;
-  name?: string;
+  name?: Translation;
   legalName?: string;
   TIN?: string;
   responsibleId?: string;

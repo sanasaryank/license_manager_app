@@ -4,7 +4,6 @@ export interface HistoryListItem {
   id: number;
   date: string; // "YYYY-MM-DD"
   userId: string;
-  userName: string;
   actionType: HistoryActionType;
   objectType: string;
   objectId: string;

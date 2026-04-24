@@ -166,6 +166,9 @@ const eng = {
     addLicense: 'Add License',
     removeLicense: 'Remove License',
     licenseHeader: 'License',
+    endDate: 'End Date',
+    minEndDate: 'Min. End Date',
+    lastChangeDate: 'Last Changed',
     noLicenseTypeSelected: 'Select a license type to configure values',
   },
 

@@ -1,9 +1,9 @@
 # API Reference
 
-Base URL: `https://ccp.apihub.am`
+Base URL: `https://license.trio.am`
 
 All requests include `credentials: 'include'` (cookie-based auth).  
-When running on localhost, all requests also include the header `X-Origin: ccp.apihub.am`.
+When running on localhost, all requests also include the header `X-Origin: license.trio.am`.
 
 ---
 
@@ -374,11 +374,10 @@ Get all customers.
 [
   {
     "id": "string",
-    "name": "string",
+    "name": { "ARM": "string", "ENG": "string", "RUS": "string" },
     "legalName": "string",
     "TIN": "string",
     "responsibleId": "string",
-    "responsibleName": "string",
     "tags": ["string"],
     "licenses": [
       {
@@ -389,14 +388,18 @@ Get all customers.
         "track": false,
         "values": {},
         "isBlocked": false,
-        "description": "string"
+        "description": "string",
+        "endDate": "string | null"
       }
     ],
     "isBlocked": false,
-    "description": "string"
+    "description": "string",
+    "lastUpdated": "string | null"
   }
 ]
 ```
+
+> `lastUpdated` is returned by the list endpoint only. It reflects the server-side modification timestamp exactly as received — no timezone conversion is applied.
 
 ---
 
@@ -408,7 +411,7 @@ Get customer by ID.
 ```json
 {
   "id": "string",
-  "name": "string",
+  "name": { "ARM": "string", "ENG": "string", "RUS": "string" },
   "legalName": "string",
   "TIN": "string",
   "responsibleId": "string",
@@ -423,16 +426,8 @@ Get customer by ID.
       "track": false,
       "values": {},
       "isBlocked": false,
-      "description": "string"
-    }
-  ],
-  "isBlocked": false,
-  "description": "string",
-  "hash": "string"
-}
-```
-
----
+        "description": "string",
+        "endDate": "string | null"
 
 ### POST /customers
 
@@ -442,7 +437,7 @@ Create a new customer.
 ```json
 {
   "id": "string",
-  "name": "string",
+  "name": { "ARM": "string", "ENG": "string", "RUS": "string" },
   "legalName": "string",
   "TIN": "string",
   "responsibleId": "string",
@@ -456,7 +451,8 @@ Create a new customer.
       "track": false,
       "values": {},
       "isBlocked": false,
-      "description": "string"
+      "description": "string",
+      "endDate": "string | null"
     }
   ],
   "isBlocked": false,
@@ -477,7 +473,7 @@ Update a customer. Only changed fields are sent. If `licenses` or `tags` changed
 {
   "id": "string",
   "hash": "string",
-  "name": "string",
+  "name": { "ARM": "string", "ENG": "string", "RUS": "string" },
   "legalName": "string",
   "TIN": "string",
   "responsibleId": "string",
@@ -491,7 +487,8 @@ Update a customer. Only changed fields are sent. If `licenses` or `tags` changed
       "track": false,
       "values": {},
       "isBlocked": false,
-      "description": "string"
+      "description": "string",
+      "endDate": "string | null"
     }
   ],
   "isBlocked": false,
@@ -608,7 +605,6 @@ Get all history records.
     "id": 1,
     "date": "2026-04-20",
     "userId": "string",
-    "userName": "string",
     "actionType": "create | edit | delete",
     "objectType": "string",
     "objectId": "string"

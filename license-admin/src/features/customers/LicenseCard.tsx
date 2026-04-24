@@ -8,9 +8,11 @@ import { Checkbox } from '../../components/ui/Checkbox';
 import { Textarea } from '../../components/ui/Textarea';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { IconTrash, IconChevronDown, IconChevronRight } from '../../components/ui/Icons';
 import { useAuth } from '../../providers/AuthProvider';
 import { resolveTranslation } from '../../utils/translation';
+import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 import type { LicenseTypeListItem } from '../../types/licenseType';
 
 interface LicenseCardProps {
@@ -24,6 +26,7 @@ export function LicenseCard({ index, onRemove, licenseTypes }: LicenseCardProps)
   const { lang } = useAuth();
   const { register, control, watch } = useFormContext();
   const [expanded, setExpanded] = useState(true);
+  const confirmRemove = useConfirmDialog();
 
   const watchedTypeId = watch(`licenses.${index}.licenseTypeId`);
   const watchedOrgName = watch(`licenses.${index}.OrgName`);
@@ -53,7 +56,7 @@ export function LicenseCard({ index, onRemove, licenseTypes }: LicenseCardProps)
         </div>
         <button
           type="button"
-          onClick={(e) => { e.stopPropagation(); onRemove(); }}
+          onClick={(e) => { e.stopPropagation(); confirmRemove.requestConfirm(async () => onRemove()); }}
           className="text-gray-400 hover:text-red-500"
         >
           <IconTrash className="h-4 w-4" />
@@ -86,6 +89,7 @@ export function LicenseCard({ index, onRemove, licenseTypes }: LicenseCardProps)
 
           <Checkbox label={t('customers.track')} {...register(`licenses.${index}.track`)} />
           <Checkbox label={t('common.blocked')} {...register(`licenses.${index}.isBlocked`)} />
+          <Input label={t('customers.endDate')} type="date" {...register(`licenses.${index}.endDate`)} />
           <Textarea label={t('common.description')} {...register(`licenses.${index}.description`)} />
 
           {/* Dynamic values based on license type fields */}
@@ -94,6 +98,13 @@ export function LicenseCard({ index, onRemove, licenseTypes }: LicenseCardProps)
           )}
         </div>
       )}
+      <ConfirmDialog
+        open={confirmRemove.isOpen}
+        title={t('customers.removeLicense')}
+        message={t('common.confirmDelete')}
+        onConfirm={confirmRemove.confirm}
+        onCancel={confirmRemove.close}
+      />
     </div>
   );
 }

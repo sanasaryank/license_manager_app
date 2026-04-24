@@ -165,6 +165,9 @@ const rus = {
     addLicense: 'Добавить лицензию',
     removeLicense: 'Удалить лицензию',
     licenseHeader: 'Лицензия',
+    endDate: 'Дата окончания',
+    minEndDate: 'Мин. дата окончания',
+    lastChangeDate: 'Дата изменения',
     noLicenseTypeSelected: 'Выберите тип лицензии',
   },
 

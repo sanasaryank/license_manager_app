@@ -4,9 +4,12 @@ import { useTranslation } from 'react-i18next';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { queryKeys } from '../../queryKeys';
 import { getAllHistory, getHistoryByObject } from '../../api/history';
+import { getEmployees } from '../../api/employees';
 import { ROUTES } from '../../constants/routes';
 import { useListOperations } from '../../hooks/useListOperations';
-import { useFilterValues, useRegisterFilterOptions } from '../../providers/FilterProvider';
+import { useAuth } from '../../providers/AuthProvider';
+import { useFilterValues, useSetFilterValue, useRegisterFilterOptions } from '../../providers/FilterProvider';
+import { resolveTranslation } from '../../utils/translation';
 import { filterByDateRange } from '../../utils/timestamp';
 import { Table } from '../../components/ui/Table';
 import { Pagination } from '../../components/ui/Pagination';
@@ -24,30 +27,58 @@ const ACTION_BADGE: Record<string, 'success' | 'info' | 'danger'> = {
 
 export default function HistoryPage() {
   const { t } = useTranslation();
+  const { lang } = useAuth();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const objectIdParam = searchParams.get('objectId') ?? undefined;
+  const urlObjectId = searchParams.get('objectId') ?? undefined;
+
+  // FilterProvider state — must be before useQuery so effectiveObjectId is stable
+  const filterValues = useFilterValues();
+  const setFilterValue = useSetFilterValue();
+  const registerFilterOptions = useRegisterFilterOptions();
+
+  // Keep filter panel in sync with the URL param:
+  // • When navigating here from another page (?objectId=x), the panel shows x and the API fetches for x.
+  // • When the URL param is absent, the panel value drives the API (user can type directly).
+  // • Navigating away clears the panel value so stale filters don't shadow future visits.
+  React.useEffect(() => {
+    setFilterValue('objectId', urlObjectId ?? '');
+  }, [urlObjectId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // URL param takes precedence on the very first render (before the sync effect fires).
+  const effectiveObjectId = urlObjectId ?? (filterValues['objectId']?.trim() || undefined);
 
   const { data: allData = [], isLoading, error } = useQuery({
-    queryKey: objectIdParam
-      ? queryKeys.history.byObjectId(objectIdParam)
+    queryKey: effectiveObjectId
+      ? queryKeys.history.byObjectId(effectiveObjectId)
       : queryKeys.history.all,
-    queryFn: objectIdParam
-      ? () => getHistoryByObject(objectIdParam)
+    queryFn: effectiveObjectId
+      ? () => getHistoryByObject(effectiveObjectId)
       : getAllHistory,
   });
 
-  const filterValues = useFilterValues();
-  const registerFilterOptions = useRegisterFilterOptions();
+  const { data: employees = [] } = useQuery({
+    queryKey: queryKeys.employees.all,
+    queryFn: getEmployees,
+  });
 
-  // Register user options for filter
+  // Build userId → display name map for fast lookup
+  const userMap = React.useMemo(
+    () => new Map(employees.map((e) => [e.id, resolveTranslation(e.name, lang)])),
+    [employees, lang],
+  );
+
+  const resolveUser = (h: import('../../types/history').HistoryListItem) =>
+    userMap.get(h.userId) ?? h.userId;
+
+  // Register user options for filter — runs whenever history data or employee list changes
   React.useEffect(() => {
-    const users = Array.from(new Set(allData.map((h) => h.userName))).map((u) => ({
-      value: u,
-      label: u,
-    }));
+    const map = new Map(employees.map((e) => [e.id, resolveTranslation(e.name, lang)]));
+    const users = Array.from(
+      new Map(allData.map((h) => [h.userId, map.get(h.userId) ?? h.userId])).entries(),
+    ).map(([value, label]) => ({ value, label }));
     registerFilterOptions('userName', users);
-  }, [allData, registerFilterOptions]);
+  }, [allData, employees, lang, registerFilterOptions]);
 
   // Date range filtering on top of useListOperations
   const dateFiltered = React.useMemo(
@@ -56,15 +87,15 @@ export default function HistoryPage() {
   );
 
   const filterFields = [
-    { key: 'userName', extract: (h: HistoryListItem) => h.userName, matchMode: 'exact' as const },
+    { key: 'userName', extract: (h: HistoryListItem) => h.userId, matchMode: 'exact' as const },
     { key: 'objectType', extract: (h: HistoryListItem) => h.objectType },
-    { key: 'objectId', extract: (h: HistoryListItem) => String(h.objectId) },
+    // objectId is handled at API level via effectiveObjectId — no client-side duplicate
     { key: 'actionType', extract: (h: HistoryListItem) => h.actionType, matchMode: 'exact' as const },
   ];
 
   const listOps = useListOperations<HistoryListItem>({
     data: dateFiltered,
-    searchFields: (h) => [h.userName, h.objectType, String(h.objectId)],
+    searchFields: (h) => [resolveUser(h), h.objectType, String(h.objectId)],
     filterFields,
     externalFilters: filterValues,
     defaultSort: { key: 'date', direction: 'desc' },
@@ -74,7 +105,7 @@ export default function HistoryPage() {
 
   const columns = [
     { key: 'date', header: t('history.date'), sortable: true },
-    { key: 'userName', header: t('history.user'), sortable: true },
+    { key: 'userName', header: t('history.user'), sortable: true, render: (h: HistoryListItem) => resolveUser(h) },
     { key: 'objectType', header: t('history.objectType'), sortable: true },
     { key: 'objectId', header: t('history.objectId') },
     {
@@ -102,7 +133,7 @@ export default function HistoryPage() {
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold text-gray-900">{t('history.title')}</h1>
-        {objectIdParam && (
+        {effectiveObjectId && (
           <Button
             variant="secondary"
             size="sm"

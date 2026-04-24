@@ -107,5 +107,6 @@ const router = createBrowserRouter([
 ]);
 
 export function AppRouter() {
-  return <RouterProvider router={router} />;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return <RouterProvider router={router} future={{ v7_startTransition: true } as any} />;
 }
