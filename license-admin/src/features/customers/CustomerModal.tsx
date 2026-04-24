@@ -5,9 +5,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
 import { queryKeys } from '../../queryKeys';
-import { getCustomer, createCustomer, updateCustomer } from '../../api/customers';
+import { getCustomer, createCustomer, updateCustomer, getCustomers } from '../../api/customers';
 import { getEmployees } from '../../api/employees';
 import { buildDiffPayload } from '../../api/diffPayload';
+import { buildTree, getDescendantIds } from '../../utils/customerTree';
 import { TranslationEditor } from '../../components/form/TranslationEditor';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
@@ -24,8 +25,10 @@ import { useAuth } from '../../providers/AuthProvider';
 import { resolveTranslation } from '../../utils/translation';
 import type { CustomerUpdatePayload, CustomerLicense } from '../../types/customer';
 import type { LicenseTypeListItem } from '../../types/licenseType';
+import type { LicenseVersionListItem } from '../../types/licenseVersion';
 import type { CustomerTagListItem } from '../../types/customerTag';
 import { LicenseCard } from './LicenseCard';
+import { CustomerGroupModal } from './CustomerGroupModal';
 
 const translationSchema = z.object({
   ARM: z.string().default(''),
@@ -35,6 +38,7 @@ const translationSchema = z.object({
 
 const licenseSchema = z.object({
   licenseTypeId: z.string().optional().default(''),
+  versionId: z.string().optional().default(''),
   OrgName: z.string().optional().default(''),
   MaxConnCount: z.number().optional(),
   hwid: z.string().optional().default(''),
@@ -55,6 +59,7 @@ const schema = z.object({
   description: z.string().optional().default(''),
   tags: z.array(z.string()).default([]),
   licenses: z.array(licenseSchema).default([]),
+  parent_id: z.string().optional().default(''),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -64,10 +69,11 @@ interface Props {
   onClose: () => void;
   editId: string | null;
   licenseTypes: LicenseTypeListItem[];
+  licenseVersions: LicenseVersionListItem[];
   allTags: CustomerTagListItem[];
 }
 
-export function CustomerModal({ open, onClose, editId, licenseTypes, allTags }: Props) {
+export function CustomerModal({ open, onClose, editId, licenseTypes, licenseVersions, allTags }: Props) {
   const { t } = useTranslation();
   const { lang } = useAuth();
   const queryClient = useQueryClient();
@@ -84,6 +90,15 @@ export function CustomerModal({ open, onClose, editId, licenseTypes, allTags }: 
     queryFn: getEmployees,
   });
 
+  // All customers — for parent selection (deduplicated by TanStack Query)
+  const { data: allCustomers = [] } = useQuery({
+    queryKey: queryKeys.customers.all,
+    queryFn: getCustomers,
+  });
+
+  // Parent selector local state
+  const [groupModalOpen, setGroupModalOpen] = React.useState(false);
+
   const methods = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -96,6 +111,7 @@ export function CustomerModal({ open, onClose, editId, licenseTypes, allTags }: 
       description: '',
       tags: [],
       licenses: [],
+      parent_id: '',
     },
   });
 
@@ -117,6 +133,7 @@ export function CustomerModal({ open, onClose, editId, licenseTypes, allTags }: 
           ...l,
           values: (l.values as Record<string, unknown>) ?? {},
         })),
+        parent_id: customer.parent_id ?? '',
       });
     }
   }, [customer, reset]);
@@ -138,6 +155,7 @@ export function CustomerModal({ open, onClose, editId, licenseTypes, allTags }: 
             description: customer.description ?? '',
             tags: customer.tags ?? [],
             licenses: customer.licenses ?? [],
+            parent_id: customer.parent_id ?? '',
           },
           {
             name: values.name,
@@ -148,11 +166,18 @@ export function CustomerModal({ open, onClose, editId, licenseTypes, allTags }: 
             description: values.description,
             tags: values.tags,
             licenses: values.licenses as unknown[],
+            parent_id: values.parent_id ?? '',
           },
           {},
         );
         if (!diff) { onClose(); return; }
-        await updateCustomer(customer.id, { ...(diff as Record<string, unknown>), id: customer.id, hash: customer.hash } as CustomerUpdatePayload);
+        await updateCustomer(customer.id, {
+          ...(diff as Record<string, unknown>),
+          id: customer.id,
+          hash: customer.hash,
+          // Ensure parent_id null is sent when cleared
+          ...(values.parent_id !== undefined && { parent_id: values.parent_id || null }),
+        } as CustomerUpdatePayload);
       } else {
         await createCustomer({
           id: values.id,
@@ -164,6 +189,7 @@ export function CustomerModal({ open, onClose, editId, licenseTypes, allTags }: 
           description: values.description,
           tags: values.tags,
           licenses: values.licenses as never,
+          parent_id: values.parent_id || undefined,
         });
       }
       queryClient.invalidateQueries({ queryKey: queryKeys.customers.all, exact: true });
@@ -179,6 +205,20 @@ export function CustomerModal({ open, onClose, editId, licenseTypes, allTags }: 
     label: resolveTranslation(e.name, lang),
   }));
 
+  // Build parent options: exclude self and all descendants to prevent cycles
+  const parentOptions = React.useMemo(() => {
+    const { nodeMap } = buildTree(allCustomers);
+    const excludedIds = editId ? getDescendantIds(nodeMap, editId) : new Set<string>();
+    if (editId) excludedIds.add(editId);
+    return allCustomers
+      .filter((c) => (c.type ?? 'customer') === 'group')
+      .filter((c) => !excludedIds.has(c.id))
+      .map((c) => ({
+        value: c.id,
+        label: resolveTranslation(c.name, lang),
+      }));
+  }, [allCustomers, editId, lang]);
+
   // Flatten tag items for multi-select
   const allTagItems = allTags.flatMap((tag) =>
     (tag.items ?? []).map((item) => ({
@@ -187,10 +227,12 @@ export function CustomerModal({ open, onClose, editId, licenseTypes, allTags }: 
     })),
   );
 
+  const isGroup = customer?.type === 'group';
+
   const tabs = [
     { key: 'general', label: t('common.name') },
     { key: 'tags', label: t('customers.tags') },
-    { key: 'licenses', label: t('customers.licenses') },
+    ...(!isGroup ? [{ key: 'licenses', label: t('customers.licenses') }] : []),
   ];
 
   return (
@@ -224,14 +266,43 @@ export function CustomerModal({ open, onClose, editId, licenseTypes, allTags }: 
                         error={errors.id?.message}
                       />
                       <TranslationEditor prefix="name" label={t('customers.name')} required />
-                      <Input label={t('customers.legalName')} {...register('legalName')} />
-                      <Input label={t('customers.tin')} {...register('TIN')} />
-                      <Select
-                        label={t('customers.responsible')}
-                        options={responsibleOptions}
-                        placeholder={t('common.all')}
-                        {...register('responsibleId')}
-                      />
+                      {!isGroup && <Input label={t('customers.legalName')} {...register('legalName')} />}
+                      {!isGroup && <Input label={t('customers.tin')} {...register('TIN')} />}
+                      {!isGroup && (
+                        <Select
+                          label={t('customers.responsible')}
+                          options={responsibleOptions}
+                          placeholder={t('common.all')}
+                          {...register('responsibleId')}
+                        />
+                      )}
+                      {/* Parent selector */}
+                      <div className="flex flex-col gap-1">
+                        <label className="text-sm font-medium text-gray-700">
+                          {t('customers.parent')}
+                        </label>
+                        <select
+                          className="form-select block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                          {...register('parent_id')}
+                        >
+                          <option value="">{t('customers.noParent')}</option>
+                          {parentOptions.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </option>
+                          ))}
+                        </select>
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          leftIcon={<IconPlus />}
+                          onClick={() => setGroupModalOpen(true)}
+                          className="mt-1 self-start"
+                        >
+                          {t('customers.createGroupTitle')}
+                        </Button>
+                      </div>
                       <Checkbox label={t('common.blocked')} {...register('isBlocked')} />
                       <Textarea label={t('common.description')} {...register('description')} />
                     </div>
@@ -276,6 +347,7 @@ export function CustomerModal({ open, onClose, editId, licenseTypes, allTags }: 
                           index={i}
                           onRemove={() => removeLicense(i)}
                           licenseTypes={licenseTypes}
+                          licenseVersions={licenseVersions}
                         />
                       ))}
                       <Button
@@ -285,6 +357,7 @@ export function CustomerModal({ open, onClose, editId, licenseTypes, allTags }: 
                         onClick={() =>
                           appendLicense({
                             licenseTypeId: '',
+                            versionId: '',
                             OrgName: '',
                             MaxConnCount: undefined,
                             hwid: '',
@@ -306,6 +379,18 @@ export function CustomerModal({ open, onClose, editId, licenseTypes, allTags }: 
             {errorMessage && <ErrorBanner message={errorMessage} />}
           </form>
         </FormProvider>
+      )}
+      {/* Inline group creation — nested portal modal */}
+      {groupModalOpen && (
+        <CustomerGroupModal
+          open={groupModalOpen}
+          onClose={() => setGroupModalOpen(false)}
+          onCreated={(id) => {
+            methods.setValue('parent_id', id);
+            setGroupModalOpen(false);
+          }}
+          allTags={allTags}
+        />
       )}
     </Modal>
   );

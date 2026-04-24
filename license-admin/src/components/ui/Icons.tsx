@@ -101,3 +101,35 @@ export function IconEyeOff({ className }: { className?: string }) {
     </svg>
   );
 }
+
+export function IconFolder({ className }: { className?: string }) {
+  return (
+    <svg className={className ?? 'h-4 w-4'} viewBox="0 0 20 20" fill="currentColor">
+      <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
+    </svg>
+  );
+}
+
+export function IconList({ className }: { className?: string }) {
+  return (
+    <svg className={className ?? 'h-4 w-4'} viewBox="0 0 20 20" fill="currentColor">
+      <path fillRule="evenodd" d="M3 4a1 1 0 000 2h14a1 1 0 100-2H3zm0 5a1 1 0 000 2h14a1 1 0 100-2H3zm0 5a1 1 0 000 2h14a1 1 0 100-2H3z" clipRule="evenodd" />
+    </svg>
+  );
+}
+
+export function IconTree({ className }: { className?: string }) {
+  return (
+    <svg className={className ?? 'h-4 w-4'} viewBox="0 0 20 20" fill="currentColor">
+      <path fillRule="evenodd" d="M3 3a1 1 0 000 2h1v2H3a1 1 0 000 2h1v2H3a1 1 0 100 2h2a1 1 0 001-1v-2h3v1a1 1 0 001 1h4a1 1 0 001-1v-2a1 1 0 00-1-1h-4a1 1 0 00-1 1v-1H7V9h3a1 1 0 000-2H7V5h3a1 1 0 000-2H4a1 1 0 00-1-1z" clipRule="evenodd" />
+    </svg>
+  );
+}
+
+export function IconDownload({ className }: { className?: string }) {
+  return (
+    <svg className={className ?? 'h-4 w-4'} viewBox="0 0 20 20" fill="currentColor">
+      <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+    </svg>
+  );
+}

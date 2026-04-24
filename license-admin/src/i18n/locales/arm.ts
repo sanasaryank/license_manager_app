@@ -59,6 +59,7 @@ const arm = {
     employees: 'Աշխատակիցներ',
     customerTags: 'Հաճախորդների պիտակներ',
     licenseTypes: 'Լիցենզիաների տեսակներ',
+    licenseVersions: 'Լիցենզիաների տարբերակներ',
     history: 'Պատմություն',
     logout: 'Ելք',
     validators: 'Վալիդատորներ',
@@ -169,6 +170,21 @@ const arm = {
     minEndDate: 'Նվ. ավարտի ամսաթիվ',
     lastChangeDate: 'Վերջին փոփոխություն',
     noLicenseTypeSelected: 'Ընտրեք լիցենզիայի տեսակը՝ արժեքները կարգավորելու համար',
+    type: 'Տեսակ',
+    typeCustomer: 'Հաճախորդ',
+    typeGroup: 'Խումբ',
+    parent: 'Ծնողային',
+    parentSearch: 'Փնտրել...',
+    noParent: 'Առանց ծնողի',
+    childrenCount: 'Հաճախորդներ',
+    viewFlat: 'Ցուցակ',
+    viewTree: 'Ծառ',
+    createGroupTitle: 'Ստեղծել խումբ',
+    downloadLicense: 'Ներբեռնել լիցենզիա',
+    downloadLicenseSelectTitle: 'Ենտրել լիցենզիա',
+    downloadLicenseSelectPrompt: 'Ահաբակիչին ունի մի քանի լիցենզիա: Ենտրեք մեկժի լիցենզիան ներբեռնելու համար:',
+    downloadLicenseNoLicenses: 'Ահաբակիչին լիցենզիաներ չկան:',
+    licenseVersion: 'Տարբերակ',
   },
 
   history: {
@@ -225,6 +241,12 @@ const arm = {
     noFieldsConfigured: 'Դաշտեր սահմանված չեն',
     selectField: 'Ընտրել դաշտ...',
     previewMode: 'Նախադիտման ռեժիմ',
+  },
+
+  licenseVersions: {
+    title: 'Լիցենզիաների տարբերակներ',
+    createTitle: 'Ստեղծել լիցենզիայի տարբերակ',
+    editTitle: 'Խմբագրել լիցենզիայի տարբերակը',
   },
 
   errors: {

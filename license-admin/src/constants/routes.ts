@@ -4,6 +4,7 @@ export const ROUTES = {
   DICTIONARIES_EMPLOYEES: '/dictionaries/employees',
   DICTIONARIES_CUSTOMER_TAGS: '/dictionaries/customertags',
   DICTIONARIES_LICENSE_TYPES: '/dictionaries/licensetypes',
+  DICTIONARIES_LICENSE_VERSIONS: '/dictionaries/licenseversions',
   HISTORY: '/history',
   DICTIONARIES_VALIDATORS: '/dictionaries/validators',
 } as const;

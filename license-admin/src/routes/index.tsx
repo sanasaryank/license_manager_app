@@ -10,6 +10,7 @@ const CustomersPage = lazy(() => import('../features/customers/CustomersPage'));
 const EmployeesPage = lazy(() => import('../features/employees/EmployeesPage'));
 const CustomerTagsPage = lazy(() => import('../features/customerTags/CustomerTagsPage'));
 const LicenseTypesPage = lazy(() => import('../features/licenseTypes/LicenseTypesPage'));
+const LicenseVersionsPage = lazy(() => import('../features/licenseVersions/LicenseVersionsPage'));
 const ValidatorsPage = lazy(() => import('../features/validators/ValidatorsPage'));
 const HistoryPage = lazy(() => import('../features/history/HistoryPage'));
 
@@ -77,6 +78,16 @@ const router = createBrowserRouter([
           <ProtectedRoute requireSuperAdmin>
             <SuspenseWrapper>
               <LicenseTypesPage />
+            </SuspenseWrapper>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: ROUTES.DICTIONARIES_LICENSE_VERSIONS,
+        element: (
+          <ProtectedRoute requireSuperAdmin>
+            <SuspenseWrapper>
+              <LicenseVersionsPage />
             </SuspenseWrapper>
           </ProtectedRoute>
         ),

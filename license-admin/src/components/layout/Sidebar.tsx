@@ -89,6 +89,7 @@ export function Sidebar() {
                   <NavItem to={ROUTES.DICTIONARIES_EMPLOYEES} label={t('nav.employees')} />
                   <NavItem to={ROUTES.DICTIONARIES_CUSTOMER_TAGS} label={t('nav.customerTags')} />
                   <NavItem to={ROUTES.DICTIONARIES_LICENSE_TYPES} label={t('nav.licenseTypes')} />
+                  <NavItem to={ROUTES.DICTIONARIES_LICENSE_VERSIONS} label={t('nav.licenseVersions')} />
                   <NavItem to={ROUTES.DICTIONARIES_VALIDATORS} label={t('nav.validators')} />
                 </div>
               )}

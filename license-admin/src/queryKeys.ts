@@ -16,6 +16,11 @@ export const queryKeys = {
     byId: (id: string) => ['licenseType', id] as const,
   },
 
+  licenseVersions: {
+    all: ['licenseVersions'] as const,
+    byId: (id: string) => ['licenseVersion', id] as const,
+  },
+
   customers: {
     all: ['customers'] as const,
     byId: (id: string) => ['customer', id] as const,

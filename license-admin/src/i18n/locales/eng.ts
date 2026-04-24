@@ -59,6 +59,7 @@ const eng = {
     employees: 'Employees',
     customerTags: 'Customer Tags',
     licenseTypes: 'License Types',
+    licenseVersions: 'License Versions',
     history: 'History',
     logout: 'Logout',
     validators: 'Validators',
@@ -170,6 +171,21 @@ const eng = {
     minEndDate: 'Min. End Date',
     lastChangeDate: 'Last Changed',
     noLicenseTypeSelected: 'Select a license type to configure values',
+    type: 'Type',
+    typeCustomer: 'Customer',
+    typeGroup: 'Group',
+    parent: 'Parent',
+    parentSearch: 'Search...',
+    noParent: 'No parent',
+    childrenCount: 'Customers',
+    viewFlat: 'Flat',
+    viewTree: 'Tree',
+    createGroupTitle: 'Create Group',
+    downloadLicense: 'Download License',
+    downloadLicenseSelectTitle: 'Select License',
+    downloadLicenseSelectPrompt: 'This customer has multiple licenses. Select one to download.',
+    downloadLicenseNoLicenses: 'This customer has no licenses.',
+    licenseVersion: 'Version',
   },
 
   history: {
@@ -226,6 +242,12 @@ const eng = {
     noFieldsConfigured: 'No fields configured',
     selectField: 'Select field...',
     previewMode: 'Preview Mode',
+  },
+
+  licenseVersions: {
+    title: 'License Versions',
+    createTitle: 'Create License Version',
+    editTitle: 'Edit License Version',
   },
 
   errors: {

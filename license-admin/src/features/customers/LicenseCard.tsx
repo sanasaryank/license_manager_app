@@ -14,14 +14,16 @@ import { useAuth } from '../../providers/AuthProvider';
 import { resolveTranslation } from '../../utils/translation';
 import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 import type { LicenseTypeListItem } from '../../types/licenseType';
+import type { LicenseVersionListItem } from '../../types/licenseVersion';
 
 interface LicenseCardProps {
   index: number;
   onRemove: () => void;
   licenseTypes: LicenseTypeListItem[];
+  licenseVersions: LicenseVersionListItem[];
 }
 
-export function LicenseCard({ index, onRemove, licenseTypes }: LicenseCardProps) {
+export function LicenseCard({ index, onRemove, licenseTypes, licenseVersions }: LicenseCardProps) {
   const { t } = useTranslation();
   const { lang } = useAuth();
   const { register, control, watch } = useFormContext();
@@ -38,6 +40,11 @@ export function LicenseCard({ index, onRemove, licenseTypes }: LicenseCardProps)
   const ltOptions = licenseTypes.map((lt) => ({
     value: lt.id,
     label: resolveTranslation(lt.name, lang),
+  }));
+
+  const versionOptions = licenseVersions.map((lv) => ({
+    value: lv.id,
+    label: lv.name,
   }));
 
   return (
@@ -75,6 +82,19 @@ export function LicenseCard({ index, onRemove, licenseTypes }: LicenseCardProps)
                   options={ltOptions}
                   placeholder={t('common.all')}
                   value={field.value}
+                  onChange={field.onChange}
+                />
+              )}
+            />
+            <Controller
+              name={`licenses.${index}.versionId`}
+              control={control}
+              render={({ field }) => (
+                <Select
+                  label={t('customers.licenseVersion')}
+                  options={versionOptions}
+                  placeholder={t('common.all')}
+                  value={field.value ?? ''}
                   onChange={field.onChange}
                 />
               )}

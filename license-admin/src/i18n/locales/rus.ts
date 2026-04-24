@@ -59,6 +59,7 @@ const rus = {
     employees: 'Сотрудники',
     customerTags: 'Теги клиентов',
     licenseTypes: 'Типы лицензий',
+    licenseVersions: 'Версии лицензий',
     history: 'История',
     logout: 'Выйти',
     validators: 'Валидаторы',
@@ -169,6 +170,21 @@ const rus = {
     minEndDate: 'Мин. дата окончания',
     lastChangeDate: 'Дата изменения',
     noLicenseTypeSelected: 'Выберите тип лицензии',
+    type: 'Тип',
+    typeCustomer: 'Клиент',
+    typeGroup: 'Группа',
+    parent: 'Родитель',
+    parentSearch: 'Поиск...',
+    noParent: 'Без родителя',
+    childrenCount: 'Клиенты',
+    viewFlat: 'Список',
+    viewTree: 'Дерево',
+    createGroupTitle: 'Создать группу',
+    downloadLicense: 'Скачать лицензию',
+    downloadLicenseSelectTitle: 'Выберите лицензию',
+    downloadLicenseSelectPrompt: 'У клиента несколько лицензий. Выберите одну для загрузки.',
+    downloadLicenseNoLicenses: 'У этого клиента нет лицензий.',
+    licenseVersion: 'Версия',
   },
 
   history: {
@@ -225,6 +241,12 @@ const rus = {
     noFieldsConfigured: 'Поля не настроены',
     selectField: 'Выбрать поле...',
     previewMode: 'Режим просмотра',
+  },
+
+  licenseVersions: {
+    title: 'Версии лицензий',
+    createTitle: 'Создать версию лицензии',
+    editTitle: 'Редактировать версию лицензии',
   },
 
   errors: {

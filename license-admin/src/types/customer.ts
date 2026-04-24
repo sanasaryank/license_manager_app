@@ -1,10 +1,13 @@
 import type { Translation } from './common';
 
+export type CustomerNodeType = 'customer' | 'group';
+
 export interface CustomerLicense {
   OrgName: string;
   MaxConnCount: number;
   hwid: string;
   licenseTypeId: string;
+  versionId?: string;
   track: boolean;
   values: Record<string, unknown>;
   isBlocked: boolean;
@@ -24,6 +27,10 @@ export interface CustomerListItem {
   isBlocked: boolean;
   description: string;
   lastUpdated?: string;
+  /** Hierarchy: null/undefined = root node */
+  parent_id?: string | null;
+  /** 'group' nodes have no licenses/responsible/TIN */
+  type?: CustomerNodeType;
 }
 
 export interface CustomerDetail extends CustomerListItem {
@@ -31,7 +38,7 @@ export interface CustomerDetail extends CustomerListItem {
 }
 
 export interface CustomerCreatePayload {
-  id: string;
+  id?: string;
   name: Translation;
   legalName: string;
   TIN: string;
@@ -40,6 +47,8 @@ export interface CustomerCreatePayload {
   licenses: CustomerLicense[];
   isBlocked: boolean;
   description: string;
+  parent_id?: string | null;
+  type?: CustomerNodeType;
 }
 
 export interface CustomerUpdatePayload {
@@ -53,4 +62,5 @@ export interface CustomerUpdatePayload {
   licenses?: CustomerLicense[];
   isBlocked?: boolean;
   description?: string;
+  parent_id?: string | null;
 }

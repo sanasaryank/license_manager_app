@@ -7,6 +7,12 @@ import type {
   CustomerUpdatePayload,
 } from '../types/customer';
 
+export interface DownloadLicenseResponse {
+  additionalFields?: Array<{ name: string; value: unknown; addName: boolean }>;
+  general?: Record<string, unknown>;
+  custom?: Record<string, unknown>;
+}
+
 export async function getCustomers(): Promise<CustomerListItem[]> {
   const result = await get<unknown>(ENDPOINTS.CUSTOMERS);
   return Array.isArray(result) ? (result as CustomerListItem[]) : [];
@@ -22,4 +28,8 @@ export async function createCustomer(payload: CustomerCreatePayload): Promise<Cu
 
 export async function updateCustomer(id: string, payload: CustomerUpdatePayload): Promise<CustomerDetail> {
   return put<CustomerDetail>(`${ENDPOINTS.CUSTOMERS}/${id}`, payload);
+}
+
+export async function downloadLicenseData(customerId: string, hwid: string): Promise<DownloadLicenseResponse> {
+  return get<DownloadLicenseResponse>(`${ENDPOINTS.DOWNLOAD_LICENSE}/${customerId}/${encodeURIComponent(hwid)}`);
 }
