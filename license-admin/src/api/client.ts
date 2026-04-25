@@ -107,3 +107,26 @@ export async function del(path: string): Promise<void> {
   });
   return handleResponse<void>(res);
 }
+
+/** Fetch a raw-text response (e.g. base64-encoded content returned as text/html). */
+export async function getRaw(path: string): Promise<string> {
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: 'GET',
+    credentials: 'include',
+    headers: debugHeaders,
+  });
+  if (res.status === 401) {
+    handleSessionExpired();
+    throw new SessionExpiredError();
+  }
+  if (!res.ok) {
+    const fallback = res.statusText || `HTTP ${res.status}`;
+    let message = fallback;
+    try {
+      const body = await res.json();
+      if (typeof body?.message === 'string' && body.message) message = body.message;
+    } catch { /* ignore */ }
+    throw new HttpError(res.status, message);
+  }
+  return res.text();
+}

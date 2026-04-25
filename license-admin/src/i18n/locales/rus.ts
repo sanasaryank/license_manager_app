@@ -158,6 +158,7 @@ const rus = {
     isBlocked: 'Заблокирован',
     description: 'Описание',
     licenseType: 'Тип лицензии',
+    licenseId: 'ID лицензии',
     orgName: 'Название организации',
     maxConnCount: 'Макс. подключений',
     hwid: 'Аппаратный ключ',

@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { queryKeys } from '../../queryKeys';
-import { getCustomers, updateCustomer, downloadLicenseData } from '../../api/customers';
+import { getCustomers, updateCustomer, downloadLicense } from '../../api/customers';
 import { getLicenseTypes } from '../../api/licenseTypes';
 import { getLicenseVersions } from '../../api/licenseVersions';
 import { getCustomerTags } from '../../api/customerTags';
@@ -14,7 +14,7 @@ import { useAuth } from '../../providers/AuthProvider';
 import { useFilterValues, useRegisterFilterOptions } from '../../providers/FilterProvider';
 import { resolveTranslation } from '../../utils/translation';
 import { formatDate, formatDateTime, getCustomerMinEndDate, localTodayString } from '../../utils/timestamp';
-import { generateLicenseFileContent, triggerTextDownload } from '../../utils/licenseFile';
+import { triggerTextDownload } from '../../utils/licenseFile';
 import { handleGlobalError } from '../../api/errorHandler';
 import { normalizeError } from '../../api/errorNormalizer';
 import { Table } from '../../components/ui/Table';
@@ -113,8 +113,7 @@ export default function CustomersPage() {
     setDownloadingIds((prev) => new Set(prev).add(customerId));
     setDownloadingHwids((prev) => new Set(prev).add(hwid));
     try {
-      const data = await downloadLicenseData(customerId, hwid);
-      const content = generateLicenseFileContent(data);
+      const content = await downloadLicense(customerId, hwid);
       triggerTextDownload(content, 'basalt.ini');
       setLicenseSelectCustomer(null);
     } catch (err) {

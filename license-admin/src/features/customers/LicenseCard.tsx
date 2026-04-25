@@ -73,6 +73,7 @@ export function LicenseCard({ index, onRemove, licenseTypes, licenseVersions }: 
       {expanded && (
         <div className="flex flex-col gap-3 p-4">
           <div className="grid grid-cols-2 gap-3">
+            <Input label={t('customers.orgName')} {...register(`licenses.${index}.OrgName`)} />
             <Controller
               name={`licenses.${index}.licenseTypeId`}
               control={control}
@@ -86,6 +87,7 @@ export function LicenseCard({ index, onRemove, licenseTypes, licenseVersions }: 
                 />
               )}
             />
+            <Input label={t('customers.maxConnCount')} type="number" {...register(`licenses.${index}.MaxConnCount`, { valueAsNumber: true })} />
             <Controller
               name={`licenses.${index}.versionId`}
               control={control}
@@ -99,11 +101,12 @@ export function LicenseCard({ index, onRemove, licenseTypes, licenseVersions }: 
                 />
               )}
             />
-            <Input label={t('customers.orgName')} {...register(`licenses.${index}.OrgName`)} />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <Input label={t('customers.maxConnCount')} type="number" {...register(`licenses.${index}.MaxConnCount`, { valueAsNumber: true })} />
+            <div className="flex flex-col gap-1">
+              <span className="text-sm font-medium text-gray-700">{t('customers.licenseId')}</span>
+              <span className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 font-mono text-sm text-gray-600">
+                {watch(`licenses.${index}.licenseId`) || '—'}
+              </span>
+            </div>
             <Input label={t('customers.hwid')} {...register(`licenses.${index}.hwid`)} />
           </div>
 

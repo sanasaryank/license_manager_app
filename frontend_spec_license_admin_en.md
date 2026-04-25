@@ -1133,6 +1133,7 @@ This is the main and most complex page. Available to both `admin` and `superadmi
 
 ```ts
 interface CustomerLicense {
+  licenseId?: string;  // backend-generated, read-only, never sent in create/update payloads
   OrgName: string;
   MaxConnCount: number;
   hwid: string;

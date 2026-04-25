@@ -159,6 +159,7 @@ const eng = {
     isBlocked: 'Blocked',
     description: 'Description',
     licenseType: 'License Type',
+    licenseId: 'License ID',
     orgName: 'Organization Name',
     maxConnCount: 'Max Connections',
     hwid: 'Hardware ID',

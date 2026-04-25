@@ -1107,6 +1107,7 @@ UX:
 
 ```ts
 interface CustomerLicense {
+  licenseId?: string;  // генерируется сервером, только чтение, не передаётся в запросах create/update
   OrgName: string;
   MaxConnCount: number;
   hwid: string;
@@ -1128,9 +1129,6 @@ interface CustomerListItem {
   licenses: CustomerLicense[];
   isBlocked: boolean;
   description: string;
-}
-
-interface CustomerDetail extends CustomerListItem {
   hash: string;
 }
 
@@ -1763,6 +1761,7 @@ export interface CustomerTagDetailDto extends CustomerTagDto {
 }
 
 export interface CustomerLicenseDto {
+  licenseId?: string;  // генерируется сервером, только чтение, не передаётся в запросах create/update
   OrgName: string;
   MaxConnCount: number;
   hwid: string;

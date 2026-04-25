@@ -1,4 +1,4 @@
-import { get, post, put } from './client';
+import { get, post, put, getRaw } from './client';
 import { ENDPOINTS } from '../constants/endpoints';
 import type {
   CustomerListItem,
@@ -30,6 +30,9 @@ export async function updateCustomer(id: string, payload: CustomerUpdatePayload)
   return put<CustomerDetail>(`${ENDPOINTS.CUSTOMERS}/${id}`, payload);
 }
 
-export async function downloadLicenseData(customerId: string, hwid: string): Promise<DownloadLicenseResponse> {
-  return get<DownloadLicenseResponse>(`${ENDPOINTS.DOWNLOAD_LICENSE}/${customerId}/${encodeURIComponent(hwid)}`);
+export async function downloadLicense(customerId: string, hwid: string): Promise<string> {
+  const html = await getRaw(`${ENDPOINTS.DOWNLOAD_LICENSE}/${customerId}/${encodeURIComponent(hwid)}`);
+  const match = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+  const base64 = (match ? match[1] : html).trim();
+  return atob(base64);
 }

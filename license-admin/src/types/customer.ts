@@ -3,6 +3,7 @@ import type { Translation } from './common';
 export type CustomerNodeType = 'customer' | 'group';
 
 export interface CustomerLicense {
+  licenseId?: string;
   OrgName: string;
   MaxConnCount: number;
   hwid: string;

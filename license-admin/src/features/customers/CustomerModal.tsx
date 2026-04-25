@@ -37,6 +37,7 @@ const translationSchema = z.object({
 });
 
 const licenseSchema = z.object({
+  licenseId: z.string().optional().default(''),
   licenseTypeId: z.string().optional().default(''),
   versionId: z.string().optional().default(''),
   OrgName: z.string().optional().default(''),
@@ -131,6 +132,7 @@ export function CustomerModal({ open, onClose, editId, licenseTypes, licenseVers
         tags: customer.tags ?? [],
         licenses: (customer.licenses ?? []).map((l) => ({
           ...l,
+          licenseId: (l as CustomerLicense & { licenseId?: string }).licenseId ?? '',
           values: (l.values as Record<string, unknown>) ?? {},
         })),
         parent_id: customer.parent_id ?? '',
@@ -165,7 +167,7 @@ export function CustomerModal({ open, onClose, editId, licenseTypes, licenseVers
             isBlocked: values.isBlocked,
             description: values.description,
             tags: values.tags,
-            licenses: values.licenses as unknown[],
+            licenses: values.licenses.map(({ licenseId: _lid, ...l }) => l) as unknown[],
             parent_id: values.parent_id ?? '',
           },
           {},
@@ -188,7 +190,7 @@ export function CustomerModal({ open, onClose, editId, licenseTypes, licenseVers
           isBlocked: values.isBlocked,
           description: values.description,
           tags: values.tags,
-          licenses: values.licenses as never,
+          licenses: values.licenses.map(({ licenseId: _lid, ...l }) => l) as never,
           parent_id: values.parent_id || undefined,
         });
       }
@@ -356,6 +358,7 @@ export function CustomerModal({ open, onClose, editId, licenseTypes, licenseVers
                         leftIcon={<IconPlus />}
                         onClick={() =>
                           appendLicense({
+                            licenseId: '',
                             licenseTypeId: '',
                             versionId: '',
                             OrgName: '',
