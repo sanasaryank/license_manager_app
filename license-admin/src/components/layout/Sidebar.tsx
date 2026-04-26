@@ -44,6 +44,7 @@ export function Sidebar() {
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
   const [dictOpen, setDictOpen] = useState(true);
+  const [historyOpen, setHistoryOpen] = useState(true);
 
   const isSuperAdmin = user?.role === 'superadmin';
 
@@ -95,7 +96,33 @@ export function Sidebar() {
               )}
             </div>
 
-            <NavItem to={ROUTES.HISTORY} label={t('nav.history')} icon={<IconHistory className="h-4 w-4" />} />
+            {/* History group */}
+            <div className="mt-2">
+              <button
+                type="button"
+                onClick={() => setHistoryOpen((o) => !o)}
+                className="flex w-full items-center justify-between rounded-md px-3 py-2 text-sm font-medium text-primary-200 hover:bg-primary-700 hover:text-white"
+              >
+                <span className="flex items-center gap-2">
+                  <IconHistory className="h-4 w-4" />
+                  {t('nav.history')}
+                </span>
+                <svg
+                  className={clsx('h-4 w-4 transition-transform', historyOpen && 'rotate-90')}
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                </svg>
+              </button>
+              {historyOpen && (
+                <div className="ml-3 mt-1 flex flex-col gap-1">
+                  <NavItem to={ROUTES.HISTORY} label={t('nav.historyActions')} />
+                  <NavItem to={ROUTES.HISTORY_LICENSES} label={t('nav.historyLicenses')} />
+                </div>
+              )}
+            </div>
+
           </>
         )}
       </nav>

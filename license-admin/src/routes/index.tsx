@@ -4,6 +4,7 @@ import { ROUTES } from '../constants/routes';
 import { ProtectedRoute } from './ProtectedRoute';
 import { AppShell } from '../components/layout/AppShell';
 import { Spinner } from '../components/ui/Spinner';
+import { RouteErrorBoundary } from './RouteErrorBoundary';
 
 const LoginPage = lazy(() => import('../features/auth/LoginPage'));
 const CustomersPage = lazy(() => import('../features/customers/CustomersPage'));
@@ -12,7 +13,8 @@ const CustomerTagsPage = lazy(() => import('../features/customerTags/CustomerTag
 const LicenseTypesPage = lazy(() => import('../features/licenseTypes/LicenseTypesPage'));
 const LicenseVersionsPage = lazy(() => import('../features/licenseVersions/LicenseVersionsPage'));
 const ValidatorsPage = lazy(() => import('../features/validators/ValidatorsPage'));
-const HistoryPage = lazy(() => import('../features/history/HistoryPage'));
+const HistoryPage = lazy(() => import('../features/history/actions/ActionsPage'));
+const LicenseHistoryPage = lazy(() => import('../features/history/licenses/LicensesPage'));
 
 const SuspenseWrapper = ({ children }: { children: React.ReactNode }) => (
   <Suspense
@@ -34,6 +36,7 @@ const router = createBrowserRouter([
         <LoginPage />
       </SuspenseWrapper>
     ),
+    errorElement: <RouteErrorBoundary />,
   },
   {
     path: '/',
@@ -42,6 +45,7 @@ const router = createBrowserRouter([
         <AppShell />
       </ProtectedRoute>
     ),
+    errorElement: <RouteErrorBoundary />,
     children: [
       { index: true, element: <Navigate to={ROUTES.CUSTOMERS} replace /> },
       {
@@ -111,6 +115,21 @@ const router = createBrowserRouter([
             </SuspenseWrapper>
           </ProtectedRoute>
         ),
+      },
+      {
+        path: ROUTES.HISTORY_LICENSES,
+        element: (
+          <ProtectedRoute requireSuperAdmin>
+            <SuspenseWrapper>
+              <LicenseHistoryPage />
+            </SuspenseWrapper>
+          </ProtectedRoute>
+        ),
+      },
+      // Redirect legacy /history → /history/actions
+      {
+        path: '/history',
+        element: <Navigate to={ROUTES.HISTORY} replace />,
       },
     ],
   },

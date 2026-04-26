@@ -27,13 +27,20 @@ export const queryKeys = {
   },
 
   history: {
-    all: ['history'] as const,
-    byObjectId: (objectId: string) => ['history', objectId] as const,
+    byDateRange: (dateFrom: string, dateTo: string) =>
+      ['history', dateFrom, dateTo] as const,
     item: (id: number) => ['historyItem', id] as const,
   },
 
   validators: {
     all: ['validators'] as const,
     byId: (id: string) => ['validators', id] as const,
+  },
+
+  licenseHistory: {
+    list: (dateFrom: string, dateTo: string) =>
+      ['licenseHistory', dateFrom, dateTo] as const,
+    request: (licenseId: string) => ['licenseRequest', licenseId] as const,
+    granted: (licenseId: string) => ['licenseGranted', licenseId] as const,
   },
 } as const;

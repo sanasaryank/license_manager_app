@@ -24,6 +24,8 @@ interface TableProps<T> {
   sort?: SortState | null;
   onSort?: (key: string) => void;
   keyExtractor: (item: T) => string;
+  /** Optional per-row className. Return undefined to use default. */
+  rowClassName?: (item: T) => string | undefined;
 }
 
 function SortIcon({ active, direction }: { active: boolean; direction?: 'asc' | 'desc' }) {
@@ -56,6 +58,7 @@ export function Table<T>({
   sort,
   onSort,
   keyExtractor,
+  rowClassName,
 }: TableProps<T>) {
   if (isLoading) {
     return (
@@ -110,7 +113,10 @@ export function Table<T>({
             data.map((item) => (
               <tr
                 key={keyExtractor(item)}
-                className="border-b last:border-0 hover:bg-gray-50"
+                className={clsx(
+                  'border-b last:border-0 hover:bg-gray-50',
+                  rowClassName?.(item),
+                )}
               >
                 {columns.map((col) => (
                   <td

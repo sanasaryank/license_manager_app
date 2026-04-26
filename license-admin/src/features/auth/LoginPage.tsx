@@ -6,6 +6,7 @@ import { useAuth } from '../../providers/AuthProvider';
 import { ROUTES } from '../../constants/routes';
 import { LANGUAGES } from '../../constants/languages';
 import type { LangCode } from '../../types/common';
+import { HttpError } from '../../api/errorNormalizer';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { ErrorBanner } from '../../components/ui/ErrorBanner';
@@ -31,8 +32,15 @@ export default function LoginPage() {
       const me = await getMe();
       setUser(me);
       navigate(ROUTES.CUSTOMERS, { replace: true });
-    } catch {
-      setError(t('auth.loginError'));
+    } catch (err) {
+      if (err instanceof HttpError) {
+        setError(err.status === 401
+          ? t('auth.loginError')
+          : `${err.status}: ${err.message}`,
+        );
+      } else {
+        setError(t('auth.loginError'));
+      }
     } finally {
       setLoading(false);
     }

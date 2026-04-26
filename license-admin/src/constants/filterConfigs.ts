@@ -13,6 +13,8 @@ export interface FilterFieldConfig {
   labelKey: string;
   type?: FilterFieldType;
   staticOptions?: FilterOption[];
+  /** If this returns true, the field is rendered as disabled. */
+  disabledWhen?: (filters: Record<string, string>) => boolean;
 }
 
 const STATUS_SWITCH: FilterFieldConfig = {
@@ -44,5 +46,24 @@ export const FILTER_CONFIGS: Record<string, FilterFieldConfig[]> = {
         { value: 'delete', labelKey: 'History.actionType.delete' },
       ],
     },
+  ],
+  [ROUTES.HISTORY_LICENSES]: [
+    { key: 'dateFrom',   labelKey: 'licenseHistory.dateFrom', type: 'date' },
+    { key: 'dateTo',     labelKey: 'licenseHistory.dateTo',   type: 'date' },
+    {
+      key: 'customer',
+      labelKey: 'licenseHistory.customer',
+      type: 'select',
+      disabledWhen: (f) => Boolean(f['customerId']?.trim()),
+    },
+    {
+      key: 'customerId',
+      labelKey: 'licenseHistory.customerId',
+      type: 'text',
+      disabledWhen: (f) => Boolean(f['customer']?.trim()),
+    },
+    { key: 'licenseId',     labelKey: 'licenseHistory.licenseId',     type: 'text' },
+    { key: 'hwid',          labelKey: 'licenseHistory.hwid',          type: 'text' },
+    { key: 'remoteAddress', labelKey: 'licenseHistory.remoteAddress',  type: 'text' },
   ],
 };

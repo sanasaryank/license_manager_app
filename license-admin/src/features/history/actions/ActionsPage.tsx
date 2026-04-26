@@ -1,23 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { queryKeys } from '../../queryKeys';
-import { getAllHistory, getHistoryByObject } from '../../api/history';
-import { getEmployees } from '../../api/employees';
-import { ROUTES } from '../../constants/routes';
-import { useListOperations } from '../../hooks/useListOperations';
-import { useAuth } from '../../providers/AuthProvider';
-import { useFilterValues, useSetFilterValue, useRegisterFilterOptions } from '../../providers/FilterProvider';
-import { resolveTranslation } from '../../utils/translation';
-import { filterByDateRange } from '../../utils/timestamp';
-import { Table } from '../../components/ui/Table';
-import { Pagination } from '../../components/ui/Pagination';
-import { Button } from '../../components/ui/Button';
-import { Badge } from '../../components/ui/Badge';
-import { RowActions } from '../../components/ui/RowActions';
-import type { HistoryListItem } from '../../types/history';
-import { HistoryDetailModal } from './HistoryDetailModal';
+import { queryKeys } from '../../../queryKeys';
+import { getHistoryByDate } from '../../../api/history';
+import { getEmployees } from '../../../api/employees';
+import { ROUTES } from '../../../constants/routes';
+import { useListOperations } from '../../../hooks/useListOperations';
+import { useAuth } from '../../../providers/AuthProvider';
+import { useFilterValues, useSetFilterValue, useRegisterFilterOptions } from '../../../providers/FilterProvider';
+import { resolveTranslation } from '../../../utils/translation';
+import { localTodayString, formatApiDate } from '../../../utils/timestamp';
+import { Table } from '../../../components/ui/Table';
+import { Pagination } from '../../../components/ui/Pagination';
+import { Button } from '../../../components/ui/Button';
+import { Badge } from '../../../components/ui/Badge';
+import { RowActions } from '../../../components/ui/RowActions';
+import type { HistoryListItem } from '../../../types/history';
+import { ActionDetailModal } from './ActionDetailModal';
 
 const ACTION_BADGE: Record<string, 'success' | 'info' | 'danger'> = {
   create: 'success',
@@ -25,36 +25,41 @@ const ACTION_BADGE: Record<string, 'success' | 'info' | 'danger'> = {
   delete: 'danger',
 };
 
-export default function HistoryPage() {
+export default function ActionsPage() {
   const { t } = useTranslation();
   const { lang } = useAuth();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const urlObjectId = searchParams.get('objectId') ?? undefined;
 
-  // FilterProvider state — must be before useQuery so effectiveObjectId is stable
   const filterValues = useFilterValues();
   const setFilterValue = useSetFilterValue();
   const registerFilterOptions = useRegisterFilterOptions();
 
-  // Keep filter panel in sync with the URL param:
-  // • When navigating here from another page (?objectId=x), the panel shows x and the API fetches for x.
-  // • When the URL param is absent, the panel value drives the API (user can type directly).
-  // • Navigating away clears the panel value so stale filters don't shadow future visits.
-  React.useEffect(() => {
+  // ── Default date filters (only on first visit) ──
+  const initialized = useRef(false);
+  useEffect(() => {
+    if (initialized.current) return;
+    initialized.current = true;
+    if (!filterValues['dateFrom']) setFilterValue('dateFrom', localTodayString(-1));
+    if (!filterValues['dateTo'])   setFilterValue('dateTo',   localTodayString(0));
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Sync objectId URL param into filter panel ──
+  useEffect(() => {
     setFilterValue('objectId', urlObjectId ?? '');
   }, [urlObjectId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // URL param takes precedence on the very first render (before the sync effect fires).
-  const effectiveObjectId = urlObjectId ?? (filterValues['objectId']?.trim() || undefined);
+  // ── API query — only dateFrom and dateTo are sent per contract ──
+  const dateFrom    = filterValues['dateFrom'] ?? '';
+  const dateTo      = filterValues['dateTo']   ?? '';
+  const apiDateFrom = formatApiDate(dateFrom);
+  const apiDateTo   = formatApiDate(dateTo);
 
   const { data: allData = [], isLoading, error } = useQuery({
-    queryKey: effectiveObjectId
-      ? queryKeys.history.byObjectId(effectiveObjectId)
-      : queryKeys.history.all,
-    queryFn: effectiveObjectId
-      ? () => getHistoryByObject(effectiveObjectId)
-      : getAllHistory,
+    queryKey: queryKeys.history.byDateRange(apiDateFrom, apiDateTo),
+    queryFn: () => getHistoryByDate({ dateFrom: apiDateFrom, dateTo: apiDateTo }),
+    enabled: Boolean(apiDateFrom) && Boolean(apiDateTo),
   });
 
   const { data: employees = [] } = useQuery({
@@ -62,17 +67,14 @@ export default function HistoryPage() {
     queryFn: getEmployees,
   });
 
-  // Build userId → display name map for fast lookup
   const userMap = React.useMemo(
     () => new Map(employees.map((e) => [e.id, resolveTranslation(e.name, lang)])),
     [employees, lang],
   );
 
-  const resolveUser = (h: import('../../types/history').HistoryListItem) =>
-    userMap.get(h.userId) ?? h.userId;
+  const resolveUser = (h: HistoryListItem) => userMap.get(h.userId) ?? h.userId;
 
-  // Register user options for filter — runs whenever history data or employee list changes
-  React.useEffect(() => {
+  useEffect(() => {
     const map = new Map(employees.map((e) => [e.id, resolveTranslation(e.name, lang)]));
     const users = Array.from(
       new Map(allData.map((h) => [h.userId, map.get(h.userId) ?? h.userId])).entries(),
@@ -80,21 +82,16 @@ export default function HistoryPage() {
     registerFilterOptions('userName', users);
   }, [allData, employees, lang, registerFilterOptions]);
 
-  // Date range filtering on top of useListOperations
-  const dateFiltered = React.useMemo(
-    () => filterByDateRange(allData, filterValues),
-    [allData, filterValues],
-  );
-
+  // ── Client-side filters: userName, objectType, objectId, actionType ──
   const filterFields = [
-    { key: 'userName', extract: (h: HistoryListItem) => h.userId, matchMode: 'exact' as const },
+    { key: 'userName',   extract: (h: HistoryListItem) => h.userId,        matchMode: 'exact' as const },
     { key: 'objectType', extract: (h: HistoryListItem) => h.objectType },
-    // objectId is handled at API level via effectiveObjectId — no client-side duplicate
-    { key: 'actionType', extract: (h: HistoryListItem) => h.actionType, matchMode: 'exact' as const },
+    { key: 'objectId',   extract: (h: HistoryListItem) => String(h.objectId) },
+    { key: 'actionType', extract: (h: HistoryListItem) => h.actionType,    matchMode: 'exact' as const },
   ];
 
   const listOps = useListOperations<HistoryListItem>({
-    data: dateFiltered,
+    data: allData,
     searchFields: (h) => [resolveUser(h), h.objectType, String(h.objectId)],
     filterFields,
     externalFilters: filterValues,
@@ -133,7 +130,7 @@ export default function HistoryPage() {
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold text-gray-900">{t('history.title')}</h1>
-        {effectiveObjectId && (
+        {urlObjectId && (
           <Button
             variant="secondary"
             size="sm"
@@ -166,7 +163,7 @@ export default function HistoryPage() {
       </div>
 
       {detailId !== null && (
-        <HistoryDetailModal
+        <ActionDetailModal
           open
           id={detailId}
           onClose={() => setDetailId(null)}

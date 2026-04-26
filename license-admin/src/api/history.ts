@@ -1,14 +1,13 @@
-import { get } from './client';
+import { get, post } from './client';
 import { ENDPOINTS } from '../constants/endpoints';
-import type { HistoryListItem, HistoryDetails } from '../types/history';
+import type { HistoryListItem, HistoryDetails, HistoryFilter } from '../types/history';
 
-export async function getAllHistory(): Promise<HistoryListItem[]> {
-  const result = await get<unknown>(ENDPOINTS.HISTORY);
-  return Array.isArray(result) ? (result as HistoryListItem[]) : [];
-}
-
-export async function getHistoryByObject(objectId: string): Promise<HistoryListItem[]> {
-  const result = await get<unknown>(`${ENDPOINTS.HISTORY}?objectId=${encodeURIComponent(objectId)}`);
+/**
+ * POST /history — fetch actions by date range.
+ * Only dateFrom and dateTo are sent per the API contract.
+ */
+export async function getHistoryByDate(filter: HistoryFilter): Promise<HistoryListItem[]> {
+  const result = await post<unknown>(ENDPOINTS.HISTORY, filter);
   return Array.isArray(result) ? (result as HistoryListItem[]) : [];
 }
 

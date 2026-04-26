@@ -19,7 +19,7 @@ import { Textarea } from '../../components/ui/Textarea';
 import { ErrorBanner } from '../../components/ui/ErrorBanner';
 import { Spinner } from '../../components/ui/Spinner';
 import { Tabs } from '../../components/ui/Tabs';
-import { IconPlus } from '../../components/ui/Icons';
+import { IconPlus, IconCopy } from '../../components/ui/Icons';
 import { useFormError } from '../../hooks/useFormError';
 import { useAuth } from '../../providers/AuthProvider';
 import { resolveTranslation } from '../../utils/translation';
@@ -260,13 +260,29 @@ export function CustomerModal({ open, onClose, editId, licenseTypes, licenseVers
                 <>
                   {active === 'general' && (
                     <div className="flex flex-col gap-4">
-                      <Input
-                        label={t('customers.id')}
-                        required
-                        disabled={isEdit}
-                        {...register('id')}
-                        error={errors.id?.message}
-                      />
+                      {isEdit ? (
+                        <div className="flex flex-col gap-1">
+                          <span className="text-sm font-medium text-gray-700">{t('customers.id')}</span>
+                          <div className="flex items-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-3 py-2">
+                            <span className="flex-1 font-mono text-sm text-gray-600">{editId}</span>
+                            <button
+                              type="button"
+                              onClick={() => navigator.clipboard.writeText(editId ?? '')}
+                              className="text-gray-400 hover:text-gray-600"
+                              title={t('common.copy')}
+                            >
+                              <IconCopy className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <Input
+                          label={t('customers.id')}
+                          required
+                          {...register('id')}
+                          error={errors.id?.message}
+                        />
+                      )}
                       <TranslationEditor prefix="name" label={t('customers.name')} required />
                       {!isGroup && <Input label={t('customers.legalName')} {...register('legalName')} />}
                       {!isGroup && <Input label={t('customers.tin')} {...register('TIN')} />}

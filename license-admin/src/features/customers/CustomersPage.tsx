@@ -109,11 +109,11 @@ export default function CustomersPage() {
   const [downloadingHwids, setDownloadingHwids] = useState<Set<string>>(new Set());
   const [licenseSelectCustomer, setLicenseSelectCustomer] = useState<CustomerListItem | null>(null);
 
-  const handleDownloadWithHwid = React.useCallback(async (customerId: string, hwid: string) => {
+  const handleDownloadWithHwid = React.useCallback(async (customerId: string, hwid: string, licenseId: string) => {
     setDownloadingIds((prev) => new Set(prev).add(customerId));
     setDownloadingHwids((prev) => new Set(prev).add(hwid));
     try {
-      const content = await downloadLicense(customerId, hwid);
+      const content = await downloadLicense(customerId, hwid, licenseId);
       triggerTextDownload(content, 'basalt.ini');
       setLicenseSelectCustomer(null);
     } catch (err) {
@@ -131,7 +131,7 @@ export default function CustomersPage() {
       return;
     }
     if (licenses.length === 1) {
-      handleDownloadWithHwid(customer.id, licenses[0].hwid);
+      handleDownloadWithHwid(customer.id, licenses[0].hwid, licenses[0].licenseId ?? '');
       return;
     }
     setLicenseSelectCustomer(customer);
@@ -450,7 +450,7 @@ export default function CustomersPage() {
           open={!!licenseSelectCustomer}
           onClose={() => setLicenseSelectCustomer(null)}
           licenses={licenseSelectCustomer.licenses ?? []}
-          onSelect={(hwid) => handleDownloadWithHwid(licenseSelectCustomer.id, hwid)}
+          onSelect={(hwid, licenseId) => handleDownloadWithHwid(licenseSelectCustomer.id, hwid, licenseId)}
           loadingHwids={downloadingHwids}
         />
       )}

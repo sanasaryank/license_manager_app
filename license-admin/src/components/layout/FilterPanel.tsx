@@ -33,6 +33,7 @@ export function FilterPanel() {
 
       {config.map((field) => {
         const value = filterValues[field.key] ?? '';
+        const isDisabled = field.disabledWhen ? field.disabledWhen(filterValues) : false;
 
         if (field.type === 'text' || field.type === 'date') {
           return (
@@ -41,6 +42,7 @@ export function FilterPanel() {
               label={t(field.labelKey)}
               type={field.type}
               value={value}
+              disabled={isDisabled}
               onChange={(e) => setFilterValue(field.key, e.target.value)}
             />
           );
@@ -56,6 +58,7 @@ export function FilterPanel() {
               key={field.key}
               label={t(field.labelKey)}
               value={value}
+              disabled={isDisabled}
               onChange={(e) => setFilterValue(field.key, e.target.value)}
               options={opts}
               placeholder={t('common.all')}

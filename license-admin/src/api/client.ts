@@ -108,6 +108,30 @@ export async function del(path: string): Promise<void> {
   return handleResponse<void>(res);
 }
 
+/** POST with a JSON body and return the raw text response (e.g. base64-encoded content). */
+export async function postRaw(path: string, body: unknown): Promise<string> {
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: defaultHeaders,
+    body: JSON.stringify(body),
+  });
+  if (res.status === 401) {
+    handleSessionExpired();
+    throw new SessionExpiredError();
+  }
+  if (!res.ok) {
+    const fallback = res.statusText || `HTTP ${res.status}`;
+    let message = fallback;
+    try {
+      const errBody = await res.json();
+      if (typeof errBody?.message === 'string' && errBody.message) message = errBody.message;
+    } catch { /* ignore */ }
+    throw new HttpError(res.status, message);
+  }
+  return res.text();
+}
+
 /** Fetch a raw-text response (e.g. base64-encoded content returned as text/html). */
 export async function getRaw(path: string): Promise<string> {
   const res = await fetch(`${API_BASE}${path}`, {

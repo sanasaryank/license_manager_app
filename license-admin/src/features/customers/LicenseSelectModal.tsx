@@ -8,8 +8,8 @@ interface Props {
   open: boolean;
   onClose: () => void;
   licenses: CustomerLicense[];
-  /** Called with the hwid of the selected license. */
-  onSelect: (hwid: string) => void;
+  /** Called with the hwid and licenseId of the selected license. */
+  onSelect: (hwid: string, licenseId: string) => void;
   /** IDs currently downloading — used to show loading state per row. */
   loadingHwids?: Set<string>;
 }
@@ -40,7 +40,7 @@ export function LicenseSelectModal({ open, onClose, licenses, onSelect, loadingH
               <Button
                 variant="secondary"
                 className="w-full justify-start"
-                onClick={() => onSelect(lic.hwid)}
+                onClick={() => onSelect(lic.hwid, lic.licenseId ?? '')}
                 disabled={isLoading}
                 loading={isLoading}
               >

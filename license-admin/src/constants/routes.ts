@@ -5,7 +5,9 @@ export const ROUTES = {
   DICTIONARIES_CUSTOMER_TAGS: '/dictionaries/customertags',
   DICTIONARIES_LICENSE_TYPES: '/dictionaries/licensetypes',
   DICTIONARIES_LICENSE_VERSIONS: '/dictionaries/licenseversions',
-  HISTORY: '/history',
+  /** Actions sub-page (old History). All existing navigate() calls use this. */
+  HISTORY: '/history/actions',
+  HISTORY_LICENSES: '/history/licenses',
   DICTIONARIES_VALIDATORS: '/dictionaries/validators',
 } as const;
 

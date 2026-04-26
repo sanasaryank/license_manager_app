@@ -1,11 +1,11 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { queryKeys } from '../../queryKeys';
-import { getHistoryItem } from '../../api/history';
-import { Modal } from '../../components/ui/Modal';
-import { Spinner } from '../../components/ui/Spinner';
-import { DiffNodeRenderer } from '../../utils/historyDiff';
+import { queryKeys } from '../../../queryKeys';
+import { getHistoryItem } from '../../../api/history';
+import { Modal } from '../../../components/ui/Modal';
+import { Spinner } from '../../../components/ui/Spinner';
+import { DiffNodeRenderer } from '../../../utils/historyDiff';
 
 interface Props {
   open: boolean;
@@ -13,7 +13,7 @@ interface Props {
   onClose: () => void;
 }
 
-export function HistoryDetailModal({ open, id, onClose }: Props) {
+export function ActionDetailModal({ open, id, onClose }: Props) {
   const { t } = useTranslation();
 
   const { data, isLoading } = useQuery({

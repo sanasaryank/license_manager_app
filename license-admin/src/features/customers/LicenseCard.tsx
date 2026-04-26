@@ -9,7 +9,7 @@ import { Textarea } from '../../components/ui/Textarea';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
-import { IconTrash, IconChevronDown, IconChevronRight } from '../../components/ui/Icons';
+import { IconTrash, IconChevronDown, IconChevronRight, IconCopy } from '../../components/ui/Icons';
 import { useAuth } from '../../providers/AuthProvider';
 import { resolveTranslation } from '../../utils/translation';
 import { useConfirmDialog } from '../../hooks/useConfirmDialog';
@@ -103,9 +103,21 @@ export function LicenseCard({ index, onRemove, licenseTypes, licenseVersions }: 
             />
             <div className="flex flex-col gap-1">
               <span className="text-sm font-medium text-gray-700">{t('customers.licenseId')}</span>
-              <span className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 font-mono text-sm text-gray-600">
-                {watch(`licenses.${index}.licenseId`) || '—'}
-              </span>
+              <div className="flex items-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-3 py-2">
+                <span className="flex-1 font-mono text-sm text-gray-600">
+                  {watch(`licenses.${index}.licenseId`) || '—'}
+                </span>
+                {watch(`licenses.${index}.licenseId`) && (
+                  <button
+                    type="button"
+                    onClick={() => navigator.clipboard.writeText(watch(`licenses.${index}.licenseId`) ?? '')}
+                    className="shrink-0 text-gray-400 hover:text-gray-600"
+                    title={t('common.copy')}
+                  >
+                    <IconCopy className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
             </div>
             <Input label={t('customers.hwid')} {...register(`licenses.${index}.hwid`)} />
           </div>

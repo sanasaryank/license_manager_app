@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useContext, useState, useCallback, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '../queryKeys';
 import { getMe } from '../api/auth';
@@ -8,19 +8,9 @@ import type { LangCode } from '../types/common';
 import { DEFAULT_LANG } from '../constants/languages';
 import i18n from '../i18n';
 import { LANG_TO_I18N } from '../constants/languages';
+import { AuthContext, AuthContextValue } from './authContext';
 
 const LANG_STORAGE_KEY = 'license_admin_lang';
-
-interface AuthContextValue {
-  user: CurrentUser | null;
-  setUser: (user: CurrentUser | null) => void;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  lang: LangCode;
-  setLang: (lang: LangCode) => void;
-}
-
-const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext);

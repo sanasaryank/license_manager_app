@@ -8,9 +8,12 @@ export const ENDPOINTS = {
   CUSTOMER_TAGS:    '/dictionary/customerTags',
   LICENSE_TYPES:    '/dictionary/licenseTypes',
   CUSTOMERS:        '/customers',
-  DOWNLOAD_LICENSE: '/downloadLicense',
+  GET_LICENSE: '/getLicense',
   LICENSE_VERSIONS: '/dictionary/licenseVersions',
   HISTORY:          '/history',
   HISTORY_ITEM:     '/historyItem',
   VALIDATORS:       '/validators',
+  LICENSES:         '/licenses',
+  LICENSES_REQUEST: '/licenses/request',
+  LICENSES_LICENSE: '/licenses/license',
 } as const;

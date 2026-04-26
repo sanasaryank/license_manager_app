@@ -1,5 +1,12 @@
 export type HistoryActionType = 'create' | 'edit' | 'delete';
 
+export interface HistoryFilter {
+  /** DD:MM:YYYY */
+  dateFrom: string;
+  /** DD:MM:YYYY */
+  dateTo: string;
+}
+
 export interface HistoryListItem {
   id: number;
   date: string; // "YYYY-MM-DD"

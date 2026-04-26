@@ -62,6 +62,17 @@ export function localTodayString(offsetDays = 0): string {
   ].join('-');
 }
 
+/**
+ * Convert a YYYY-MM-DD date string to the DD:MM:YYYY format required by the API.
+ */
+export function formatApiDate(dateStr: string): string {
+  if (!dateStr) return '';
+  const parts = dateStr.split('-');
+  if (parts.length !== 3) return dateStr;
+  const [year, month, day] = parts;
+  return `${day}:${month}:${year}`;
+}
+
 export function getCustomerMinEndDate(licenses: CustomerLicense[]): string | null {
   let min: string | null = null;
 
