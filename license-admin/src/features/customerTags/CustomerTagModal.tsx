@@ -32,7 +32,7 @@ const itemSchema = z.object({
 
 const schema = z.object({
   name: translationSchema,
-  description: z.string().optional(),
+  description: z.string().default(''),
   isBlocked: z.boolean().default(false),
   items: z.array(itemSchema).default([]),
 });

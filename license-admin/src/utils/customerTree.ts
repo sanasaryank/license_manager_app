@@ -26,7 +26,7 @@ export interface FlatTreeRow {
 
 /**
  * Build a tree from a flat list in two passes.
- * Nodes with missing or invalid parent_id become roots.
+ * Nodes with missing or invalid parentId become roots.
  * Handles cycles defensively (orphan becomes root).
  */
 export function buildTree(items: CustomerListItem[]): {
@@ -45,7 +45,7 @@ export function buildTree(items: CustomerListItem[]): {
   // Pass 2: link children
   for (const item of items) {
     const node = nodeMap.get(item.id)!;
-    const pid = item.parent_id;
+    const pid = item.parentId;
     if (pid && nodeMap.has(pid) && pid !== item.id) {
       nodeMap.get(pid)!.children.push(node);
     } else {

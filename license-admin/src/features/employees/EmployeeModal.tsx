@@ -31,7 +31,7 @@ const schema = z.object({
   name: translationSchema,
   role: z.enum(['admin', 'superadmin']),
   isBlocked: z.boolean().default(false),
-  description: z.string().optional(),
+  description: z.string().default(''),
 });
 
 type FormValues = z.infer<typeof schema>;

@@ -5,6 +5,8 @@ export interface HistoryFilter {
   dateFrom: string;
   /** DD:MM:YYYY */
   dateTo: string;
+  /** When set, appended as ?objectId= query parameter */
+  objectId?: string;
 }
 
 export interface HistoryListItem {

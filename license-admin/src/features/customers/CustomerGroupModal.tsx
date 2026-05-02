@@ -98,7 +98,7 @@ export function CustomerGroupModal({ open, onClose, onCreated, allTags }: Props)
     >
       <FormProvider {...methods}>
         <form id="group-form" onSubmit={handleSubmit(onSubmit)}>
-          {errorMessage && <ErrorBanner message={errorMessage} className="mb-4" />}
+          {errorMessage && <ErrorBanner message={errorMessage} />}
           <div className="flex flex-col gap-4">
             <TranslationEditor prefix="name" label={t('customers.name')} required />
             {allTagItems.length > 0 && (

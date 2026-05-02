@@ -1,4 +1,4 @@
-import { get, post, put, del } from './client';
+import { get, post, put } from './client';
 import { ENDPOINTS } from '../constants/endpoints';
 import type {
   ValidatorItem,
@@ -28,8 +28,4 @@ export async function updateValidator(
   payload: ValidatorUpdatePayload,
 ): Promise<ValidatorListItem> {
   return put<ValidatorListItem>(`${ENDPOINTS.VALIDATORS}/${id}`, payload);
-}
-
-export async function deleteValidator(id: string): Promise<void> {
-  return del(`${ENDPOINTS.VALIDATORS}/${id}`);
 }

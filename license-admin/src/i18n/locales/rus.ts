@@ -29,6 +29,7 @@ const rus = {
     resetFilters: 'Сбросить фильтры',
     clearSearch: 'Очистить',
     all: 'Все',
+    none: 'Нет',
     backToList: 'Назад к списку',
     selectLanguage: 'Язык',
     rowsPerPage: 'Строк на странице',
@@ -60,11 +61,14 @@ const rus = {
     customerTags: 'Теги клиентов',
     licenseTypes: 'Типы лицензий',
     licenseVersions: 'Версии лицензий',
+    customerStatuses: 'Статусы клиентов',
     history: 'История',
     historyActions: 'Действия',
     historyLicenses: 'Лицензии',
     logout: 'Выйти',
     validators: 'Валидаторы',
+    collapseSidebar: 'Свернуть меню',
+    expandSidebar: 'Развернуть меню',
   },
 
   translation: {
@@ -187,7 +191,9 @@ const rus = {
     downloadLicenseSelectTitle: 'Выберите лицензию',
     downloadLicenseSelectPrompt: 'У клиента несколько лицензий. Выберите одну для загрузки.',
     downloadLicenseNoLicenses: 'У этого клиента нет лицензий.',
+    showLicenses: 'История запросов лицензий',
     licenseVersion: 'Версия',
+    status: 'Статус',
   },
 
   history: {
@@ -199,6 +205,7 @@ const rus = {
     actionType: 'Действие',
     objectType: 'Тип объекта',
     objectId: 'ID объекта',
+    customer: 'Клиент',
     details: 'Детали изменений',
     noChanges: 'Изменений не зафиксировано',
     oldValue: 'Старое значение',
@@ -269,6 +276,13 @@ const rus = {
     title: 'Версии лицензий',
     createTitle: 'Создать версию лицензии',
     editTitle: 'Редактировать версию лицензии',
+  },
+
+  customerStatuses: {
+    title: 'Статусы клиентов',
+    createTitle: 'Создать статус клиента',
+    editTitle: 'Редактировать статус клиента',
+    color: 'Цвет',
   },
 
   errors: {

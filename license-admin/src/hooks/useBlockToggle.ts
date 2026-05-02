@@ -1,18 +1,18 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 interface UseBlockToggleOptions {
-  updateFn: (id: string, payload: { id: string; isBlocked: boolean }) => Promise<unknown>;
+  blockFn: (payload: { id: string; isBlocked: boolean }) => Promise<unknown>;
   listQueryKey: readonly unknown[];
 }
 
-/** Simple block/unblock: sends only id + isBlocked (no hash fetch per project decision). */
+/** Block/unblock: sends { id, isBlocked } via PATCH to the base endpoint. */
 export function useBlockToggle(options: UseBlockToggleOptions) {
-  const { updateFn, listQueryKey } = options;
+  const { blockFn, listQueryKey } = options;
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({ id, isBlocked }: { id: string; isBlocked: boolean }) =>
-      updateFn(id, { id, isBlocked }),
+      blockFn({ id, isBlocked }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: listQueryKey, exact: true }),
   });
 }

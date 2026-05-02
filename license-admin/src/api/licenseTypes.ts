@@ -1,4 +1,4 @@
-import { get, post, put } from './client';
+import { get, post, put, patch } from './client';
 import { ENDPOINTS } from '../constants/endpoints';
 import type {
   LicenseTypeListItem,
@@ -22,4 +22,8 @@ export async function createLicenseType(payload: LicenseTypeCreatePayload): Prom
 
 export async function updateLicenseType(id: string, payload: LicenseTypeUpdatePayload): Promise<LicenseTypeDetail> {
   return put<LicenseTypeDetail>(`${ENDPOINTS.LICENSE_TYPES}/${id}`, payload);
+}
+
+export async function blockLicenseType(payload: { id: string; isBlocked: boolean }): Promise<void> {
+  return patch<void>(ENDPOINTS.LICENSE_TYPES, payload);
 }

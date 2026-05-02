@@ -9,7 +9,9 @@ import type {
 export async function getLicenseHistory(
   filter: LicenseHistoryFilter,
 ): Promise<LicenseHistoryItem[]> {
-  const result = await post<unknown>(ENDPOINTS.LICENSES, filter);
+  const { customerId, ...body } = filter;
+  const query = customerId ? `?customerId=${encodeURIComponent(customerId)}` : '';
+  const result = await post<unknown>(`${ENDPOINTS.LICENSES}${query}`, body);
   return Array.isArray(result) ? (result as LicenseHistoryItem[]) : [];
 }
 

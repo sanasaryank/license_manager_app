@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { queryKeys } from '../../queryKeys';
-import { getCustomerTags, updateCustomerTag } from '../../api/customerTags';
+import { getCustomerTags, blockCustomerTag } from '../../api/customerTags';
 import { useListOperations } from '../../hooks/useListOperations';
 import { useBlockToggle } from '../../hooks/useBlockToggle';
 import { useAuth } from '../../providers/AuthProvider';
@@ -42,7 +42,7 @@ export default function CustomerTagsPage() {
   });
 
   const blockToggle = useBlockToggle({
-    updateFn: (id, payload) => updateCustomerTag(id, payload),
+    blockFn: blockCustomerTag,
     listQueryKey: queryKeys.customerTags.all,
   });
 
@@ -60,7 +60,7 @@ export default function CustomerTagsPage() {
     },
     {
       key: 'isBlocked',
-      header: t('common.status'),
+      header: t('common.blocked'),
       render: (item: CustomerTagListItem) =>
         item.isBlocked ? (
           <Badge variant="danger">{t('common.blocked')}</Badge>

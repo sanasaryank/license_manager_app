@@ -1,4 +1,4 @@
-import { get, post, put, postRaw } from './client';
+import { get, post, put, postRaw, patch } from './client';
 import { ENDPOINTS } from '../constants/endpoints';
 import type {
   CustomerListItem,
@@ -28,6 +28,10 @@ export async function createCustomer(payload: CustomerCreatePayload): Promise<Cu
 
 export async function updateCustomer(id: string, payload: CustomerUpdatePayload): Promise<CustomerDetail> {
   return put<CustomerDetail>(`${ENDPOINTS.CUSTOMERS}/${id}`, payload);
+}
+
+export async function blockCustomer(payload: { id: string; isBlocked: boolean }): Promise<void> {
+  return patch<void>(ENDPOINTS.CUSTOMERS, payload);
 }
 
 export async function downloadLicense(customerId: string, hwid: string, licenseId: string): Promise<string> {

@@ -1,4 +1,4 @@
-import { get, post, put } from './client';
+import { get, post, put, patch } from './client';
 import { ENDPOINTS } from '../constants/endpoints';
 import type {
   LicenseVersionListItem,
@@ -22,4 +22,8 @@ export async function createLicenseVersion(payload: LicenseVersionCreatePayload)
 
 export async function updateLicenseVersion(id: string, payload: LicenseVersionUpdatePayload): Promise<LicenseVersionDetail> {
   return put<LicenseVersionDetail>(`${ENDPOINTS.LICENSE_VERSIONS}/${id}`, payload);
+}
+
+export async function blockLicenseVersion(payload: { id: string; isBlocked: boolean }): Promise<void> {
+  return patch<void>(ENDPOINTS.LICENSE_VERSIONS, payload);
 }

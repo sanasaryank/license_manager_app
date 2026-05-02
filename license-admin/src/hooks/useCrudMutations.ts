@@ -21,10 +21,12 @@ export function useCrudMutations<TFormValues>(
     onClose();
   };
 
-  const createMutation = useMutation({ mutationFn: createFn, onSuccess });
-  const updateMutation = useMutation({ mutationFn: updateFn, onSuccess });
+  const createMutation = useMutation({ mutationFn: createFn, onSuccess, meta: { suppressGlobalError: true } });
+  const updateMutation = useMutation({ mutationFn: updateFn, onSuccess, meta: { suppressGlobalError: true } });
 
   const submit = (values: TFormValues) => {
+    // Prevent duplicate requests while one is already in flight.
+    if (createMutation.isPending || updateMutation.isPending) return;
     if (isEdit) updateMutation.mutate(values);
     else createMutation.mutate(values);
   };

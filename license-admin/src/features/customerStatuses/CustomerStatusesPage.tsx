@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { queryKeys } from '../../queryKeys';
-import { getLicenseTypes, blockLicenseType } from '../../api/licenseTypes';
+import { getCustomerStatuses, blockCustomerStatus } from '../../api/customerStatuses';
 import { useListOperations } from '../../hooks/useListOperations';
 import { useBlockToggle } from '../../hooks/useBlockToggle';
 import { useAuth } from '../../providers/AuthProvider';
@@ -16,24 +16,24 @@ import { Badge } from '../../components/ui/Badge';
 import { RowActions } from '../../components/ui/RowActions';
 import { IconPlus } from '../../components/ui/Icons';
 import { ROUTES } from '../../constants/routes';
-import type { LicenseTypeListItem } from '../../types/licenseType';
-import { LicenseTypeModal } from './LicenseTypeModal';
+import type { CustomerStatusListItem } from '../../types/customerStatus';
+import { CustomerStatusModal } from './CustomerStatusModal';
 
-export default function LicenseTypesPage() {
+export default function CustomerStatusesPage() {
   const { t } = useTranslation();
   const { lang } = useAuth();
   const navigate = useNavigate();
 
   const { data = [], isLoading, error } = useQuery({
-    queryKey: queryKeys.licenseTypes.all,
-    queryFn: getLicenseTypes,
+    queryKey: queryKeys.customerStatuses.all,
+    queryFn: getCustomerStatuses,
   });
 
   const [search, setSearch] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
 
-  const listOps = useListOperations<LicenseTypeListItem>({
+  const listOps = useListOperations<CustomerStatusListItem>({
     data,
     searchFields: (item) => [resolveTranslation(item.name, lang)],
     externalSearch: search,
@@ -42,8 +42,8 @@ export default function LicenseTypesPage() {
   });
 
   const blockToggle = useBlockToggle({
-    blockFn: blockLicenseType,
-    listQueryKey: queryKeys.licenseTypes.all,
+    blockFn: blockCustomerStatus,
+    listQueryKey: queryKeys.customerStatuses.all,
   });
 
   const columns = [
@@ -51,17 +51,25 @@ export default function LicenseTypesPage() {
       key: 'name',
       header: t('common.name'),
       sortable: true,
-      render: (item: LicenseTypeListItem) => resolveTranslation(item.name, lang),
+      render: (item: CustomerStatusListItem) => resolveTranslation(item.name, lang),
     },
     {
-      key: 'fieldsCount',
-      header: t('licenseTypes.fieldsCount'),
-      render: (item: LicenseTypeListItem) => item.fields?.length ?? 0,
+      key: 'color',
+      header: t('customerStatuses.color'),
+      render: (item: CustomerStatusListItem) => (
+        <div className="flex items-center gap-2">
+          <span
+            className="inline-block h-5 w-5 rounded-full border border-gray-200"
+            style={{ backgroundColor: item.color }}
+          />
+          <span className="font-mono text-xs text-gray-600">{item.color}</span>
+        </div>
+      ),
     },
     {
       key: 'isBlocked',
       header: t('common.blocked'),
-      render: (item: LicenseTypeListItem) =>
+      render: (item: CustomerStatusListItem) =>
         item.isBlocked ? (
           <Badge variant="danger">{t('common.blocked')}</Badge>
         ) : (
@@ -71,12 +79,12 @@ export default function LicenseTypesPage() {
     {
       key: 'description',
       header: t('common.description'),
-      render: (item: LicenseTypeListItem) => item.description || '—',
+      render: (item: CustomerStatusListItem) => item.description || '—',
     },
     {
       key: 'actions',
       header: t('common.actions'),
-      render: (item: LicenseTypeListItem) => (
+      render: (item: CustomerStatusListItem) => (
         <RowActions
           actions={[
             { type: 'edit', onClick: () => { setEditId(item.id); setModalOpen(true); } },
@@ -96,7 +104,7 @@ export default function LicenseTypesPage() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-gray-900">{t('licenseTypes.title')}</h1>
+        <h1 className="text-xl font-semibold text-gray-900">{t('customerStatuses.title')}</h1>
         <Button leftIcon={<IconPlus />} onClick={() => { setEditId(null); setModalOpen(true); }}>
           {t('common.create')}
         </Button>
@@ -131,9 +139,9 @@ export default function LicenseTypesPage() {
       </div>
 
       {modalOpen && (
-        <LicenseTypeModal
+        <CustomerStatusModal
           open={modalOpen}
-          onClose={() => setModalOpen(false)}
+          onClose={() => { setModalOpen(false); setEditId(null); }}
           editId={editId}
         />
       )}

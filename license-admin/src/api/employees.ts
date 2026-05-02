@@ -1,4 +1,4 @@
-import { get, post, put } from './client';
+import { get, post, put, patch } from './client';
 import { ENDPOINTS } from '../constants/endpoints';
 import type { Employee, EmployeeListItem, EmployeeCreatePayload, EmployeeUpdatePayload } from '../types/employee';
 
@@ -17,4 +17,8 @@ export async function createEmployee(payload: EmployeeCreatePayload): Promise<Em
 
 export async function updateEmployee(id: string, payload: EmployeeUpdatePayload): Promise<Employee> {
   return put<Employee>(`${ENDPOINTS.EMPLOYEES}/${id}`, payload);
+}
+
+export async function blockEmployee(payload: { id: string; isBlocked: boolean }): Promise<void> {
+  return patch<void>(ENDPOINTS.EMPLOYEES, payload);
 }

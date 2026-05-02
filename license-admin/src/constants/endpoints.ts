@@ -10,6 +10,7 @@ export const ENDPOINTS = {
   CUSTOMERS:        '/customers',
   GET_LICENSE: '/getLicense',
   LICENSE_VERSIONS: '/dictionary/licenseVersions',
+  CUSTOMER_STATUSES: '/dictionary/customerStatuses',
   HISTORY:          '/history',
   HISTORY_ITEM:     '/historyItem',
   VALIDATORS:       '/validators',

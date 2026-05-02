@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { queryKeys } from '../../queryKeys';
-import { getLicenseVersions, updateLicenseVersion } from '../../api/licenseVersions';
+import { getLicenseVersions, blockLicenseVersion } from '../../api/licenseVersions';
 import { useListOperations } from '../../hooks/useListOperations';
 import { useBlockToggle } from '../../hooks/useBlockToggle';
 import { Table } from '../../components/ui/Table';
@@ -39,7 +39,7 @@ export default function LicenseVersionsPage() {
   });
 
   const blockToggle = useBlockToggle({
-    updateFn: (id, payload) => updateLicenseVersion(id, payload),
+    blockFn: blockLicenseVersion,
     listQueryKey: queryKeys.licenseVersions.all,
   });
 
@@ -52,7 +52,7 @@ export default function LicenseVersionsPage() {
     },
     {
       key: 'isBlocked',
-      header: t('common.status'),
+      header: t('common.blocked'),
       render: (item: LicenseVersionListItem) =>
         item.isBlocked ? (
           <Badge variant="danger">{t('common.blocked')}</Badge>

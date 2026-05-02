@@ -99,6 +99,16 @@ export async function put<T>(path: string, body: unknown): Promise<T> {
   return handleResponse<T>(res);
 }
 
+export async function patch<T>(path: string, body: unknown): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: 'PATCH',
+    credentials: 'include',
+    headers: defaultHeaders,
+    body: JSON.stringify(body),
+  });
+  return handleResponse<T>(res);
+}
+
 export async function del(path: string): Promise<void> {
   const res = await fetch(`${API_BASE}${path}`, {
     method: 'DELETE',

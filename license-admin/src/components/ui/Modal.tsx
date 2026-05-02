@@ -21,13 +21,26 @@ const sizeMap: Record<ModalSize, string> = {
   xl: 'max-w-4xl',
 };
 
+// Track the number of currently open modals so only the topmost one handles Escape.
+let _openModalCount = 0;
+
 export function Modal({ open, onClose, title, children, footer, size = 'md' }: ModalProps) {
   const contentRef = useRef<HTMLDivElement>(null);
+  const depthRef = useRef(0);
+
+  // Assign a depth index when this modal opens; release it on close.
+  useEffect(() => {
+    if (!open) return;
+    _openModalCount++;
+    depthRef.current = _openModalCount;
+    return () => { _openModalCount--; };
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      // Only the topmost modal (highest depth) responds to Escape.
+      if (e.key === 'Escape' && depthRef.current === _openModalCount) onClose();
     };
     document.addEventListener('keydown', handleKey);
     return () => document.removeEventListener('keydown', handleKey);

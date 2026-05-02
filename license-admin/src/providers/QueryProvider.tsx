@@ -22,7 +22,8 @@ export const queryClient = new QueryClient({
     },
   }),
   mutationCache: new MutationCache({
-    onError: (error) => {
+    onError: (error, _variables, _context, mutation) => {
+      if (mutation.options.meta?.suppressGlobalError) return;
       if (shouldHandle(error)) {
         handleGlobalError(normalizeError(error));
       }

@@ -35,6 +35,7 @@ export const FILTER_CONFIGS: Record<string, FilterFieldConfig[]> = {
   [ROUTES.HISTORY]: [
     { key: 'dateFrom',   labelKey: 'history.dateFrom',   type: 'date' },
     { key: 'dateTo',     labelKey: 'history.dateTo',     type: 'date' },
+    { key: 'customer',   labelKey: 'history.customer',   type: 'select' },
     { key: 'userName',   labelKey: 'history.user',       type: 'select' },
     { key: 'objectType', labelKey: 'history.objectType', type: 'text' },
     { key: 'objectId',   labelKey: 'history.objectId',   type: 'text' },

@@ -3,6 +3,7 @@ import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import type { CustomerListItem, CustomerLicense } from '../../types/customer';
+import type { CustomerStatusListItem } from '../../types/customerStatus';
 import type { LicenseTypeListItem } from '../../types/licenseType';
 import type { CustomerTagListItem } from '../../types/customerTag';
 import type { SortState, LangCode } from '../../types/common';
@@ -51,6 +52,7 @@ interface Props {
   licenseTypes: LicenseTypeListItem[];
   allTags: CustomerTagListItem[];
   employeeMap: Map<string, string>;
+  statusMap: Map<string, CustomerStatusListItem>;
   onEdit: (id: string) => void;
   onBlockToggle: (id: string, isBlocked: boolean) => void;
   onDownloadLicense: (customer: CustomerListItem) => void;
@@ -68,6 +70,7 @@ export function CustomerTreeView({
   licenseTypes,
   allTags,
   employeeMap,
+  statusMap,
   onEdit,
   onBlockToggle,
   onDownloadLicense,
@@ -83,7 +86,8 @@ export function CustomerTreeView({
     { key: 'responsible', label: t('customers.responsible'), sortable: true },
     { key: 'licenses', label: t('customers.licenses') },
     { key: 'tags', label: t('customers.tags') },
-    { key: 'isBlocked', label: t('common.status') },
+    { key: 'status', label: t('customers.status') },
+    { key: 'isBlocked', label: t('common.blocked') },
     { key: 'lastUpdated', label: t('customers.lastChangeDate'), sortable: true },
     { key: 'minEndDate', label: t('customers.minEndDate'), sortable: true },
     { key: 'actions', label: t('common.actions') },
@@ -228,7 +232,24 @@ export function CustomerTreeView({
                     <TagChip tagIds={c.tags ?? []} allTags={allTags} />
                   </td>
 
-                  {/* Status */}
+                  {/* Customer Status */}
+                  <td className="px-4 py-3">
+                    {c.statusId ? (() => {
+                      const s = statusMap.get(c.statusId);
+                      return s ? (
+                        <span
+                          className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium text-white"
+                          style={{ backgroundColor: s.color }}
+                        >
+                          {resolveTranslation(s.name, lang)}
+                        </span>
+                      ) : (
+                        <span className="font-mono text-xs text-gray-400">{c.statusId}</span>
+                      );
+                    })() : <span className="text-gray-300">—</span>}
+                  </td>
+
+                  {/* Blocked */}
                   <td className="px-4 py-3">
                     {c.isBlocked ? (
                       <Badge variant="danger">{t('common.blocked')}</Badge>

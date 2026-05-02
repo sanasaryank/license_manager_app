@@ -17,7 +17,7 @@ import { useFormError } from '../../hooks/useFormError';
 
 const schema = z.object({
   name: z.string().regex(/^\d+\.\d+\.\d+$/, 'Format: 0.0.0 (e.g. 10.3700.1158)'),
-  description: z.string().optional().default(''),
+  description: z.string().default(''),
   isBlocked: z.boolean().default(false),
 });
 

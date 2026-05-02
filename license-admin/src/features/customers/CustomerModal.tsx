@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { queryKeys } from '../../queryKeys';
 import { getCustomer, createCustomer, updateCustomer, getCustomers } from '../../api/customers';
 import { getEmployees } from '../../api/employees';
+import { getCustomerStatuses } from '../../api/customerStatuses';
 import { buildDiffPayload } from '../../api/diffPayload';
 import { buildTree, getDescendantIds } from '../../utils/customerTree';
 import { TranslationEditor } from '../../components/form/TranslationEditor';
@@ -38,14 +39,14 @@ const translationSchema = z.object({
 
 const licenseSchema = z.object({
   licenseId: z.string().optional().default(''),
-  licenseTypeId: z.string().optional().default(''),
+  licenseTypeId: z.string().default(''),
   versionId: z.string().optional().default(''),
-  OrgName: z.string().optional().default(''),
-  MaxConnCount: z.number().optional(),
-  hwid: z.string().optional().default(''),
+  OrgName: z.string().default(''),
+  MaxConnCount: z.number().default(0),
+  hwid: z.string().default(''),
   track: z.boolean().default(false),
   isBlocked: z.boolean().default(false),
-  description: z.string().optional().default(''),
+  description: z.string().default(''),
   values: z.record(z.unknown()).default({}),
   endDate: z.string().optional().default(''),
 });
@@ -53,14 +54,15 @@ const licenseSchema = z.object({
 const schema = z.object({
   id: z.string().min(1, 'Required'),
   name: translationSchema,
-  legalName: z.string().optional().default(''),
-  TIN: z.string().optional().default(''),
-  responsibleId: z.string().optional().default(''),
+  legalName: z.string().default(''),
+  TIN: z.string().default(''),
+  responsibleId: z.string().default(''),
   isBlocked: z.boolean().default(false),
-  description: z.string().optional().default(''),
+  description: z.string().default(''),
   tags: z.array(z.string()).default([]),
   licenses: z.array(licenseSchema).default([]),
-  parent_id: z.string().optional().default(''),
+  parentId: z.string().optional().default(''),
+  statusId: z.string().optional().default(''),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -91,6 +93,11 @@ export function CustomerModal({ open, onClose, editId, licenseTypes, licenseVers
     queryFn: getEmployees,
   });
 
+  const { data: customerStatuses = [] } = useQuery({
+    queryKey: queryKeys.customerStatuses.all,
+    queryFn: getCustomerStatuses,
+  });
+
   // All customers — for parent selection (deduplicated by TanStack Query)
   const { data: allCustomers = [] } = useQuery({
     queryKey: queryKeys.customers.all,
@@ -112,7 +119,8 @@ export function CustomerModal({ open, onClose, editId, licenseTypes, licenseVers
       description: '',
       tags: [],
       licenses: [],
-      parent_id: '',
+      parentId: '',
+      statusId: '',
     },
   });
 
@@ -135,7 +143,8 @@ export function CustomerModal({ open, onClose, editId, licenseTypes, licenseVers
           licenseId: (l as CustomerLicense & { licenseId?: string }).licenseId ?? '',
           values: (l.values as Record<string, unknown>) ?? {},
         })),
-        parent_id: customer.parent_id ?? '',
+        parentId: customer.parentId ?? '',
+        statusId: customer.statusId ?? '',
       });
     }
   }, [customer, reset]);
@@ -157,7 +166,8 @@ export function CustomerModal({ open, onClose, editId, licenseTypes, licenseVers
             description: customer.description ?? '',
             tags: customer.tags ?? [],
             licenses: customer.licenses ?? [],
-            parent_id: customer.parent_id ?? '',
+            parentId: customer.parentId ?? '',
+            statusId: customer.statusId ?? '',
           },
           {
             name: values.name,
@@ -168,7 +178,8 @@ export function CustomerModal({ open, onClose, editId, licenseTypes, licenseVers
             description: values.description,
             tags: values.tags,
             licenses: values.licenses.map(({ licenseId: _lid, ...l }) => l) as unknown[],
-            parent_id: values.parent_id ?? '',
+            parentId: values.parentId ?? '',
+            statusId: values.statusId ?? '',
           },
           {},
         );
@@ -177,8 +188,9 @@ export function CustomerModal({ open, onClose, editId, licenseTypes, licenseVers
           ...(diff as Record<string, unknown>),
           id: customer.id,
           hash: customer.hash,
-          // Ensure parent_id null is sent when cleared
-          ...(values.parent_id !== undefined && { parent_id: values.parent_id || null }),
+          // Ensure parentId null is sent when cleared
+          ...(values.parentId !== undefined && { parentId: values.parentId || null }),
+          statusId: values.statusId || null,
         } as CustomerUpdatePayload);
       } else {
         await createCustomer({
@@ -191,7 +203,8 @@ export function CustomerModal({ open, onClose, editId, licenseTypes, licenseVers
           description: values.description,
           tags: values.tags,
           licenses: values.licenses.map(({ licenseId: _lid, ...l }) => l) as never,
-          parent_id: values.parent_id || undefined,
+          parentId: values.parentId || undefined,
+          statusId: values.statusId || null,
         });
       }
       queryClient.invalidateQueries({ queryKey: queryKeys.customers.all, exact: true });
@@ -205,6 +218,11 @@ export function CustomerModal({ open, onClose, editId, licenseTypes, licenseVers
   const responsibleOptions = employees.map((e) => ({
     value: e.id,
     label: resolveTranslation(e.name, lang),
+  }));
+
+  const statusOptions = customerStatuses.map((s) => ({
+    value: s.id,
+    label: resolveTranslation(s.name, lang),
   }));
 
   // Build parent options: exclude self and all descendants to prevent cycles
@@ -294,6 +312,14 @@ export function CustomerModal({ open, onClose, editId, licenseTypes, licenseVers
                           {...register('responsibleId')}
                         />
                       )}
+                      {!isGroup && (
+                        <Select
+                          label={t('customers.status')}
+                          options={statusOptions}
+                          placeholder={t('common.none')}
+                          {...register('statusId')}
+                        />
+                      )}
                       {/* Parent selector */}
                       <div className="flex flex-col gap-1">
                         <label className="text-sm font-medium text-gray-700">
@@ -301,7 +327,7 @@ export function CustomerModal({ open, onClose, editId, licenseTypes, licenseVers
                         </label>
                         <select
                           className="form-select block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-                          {...register('parent_id')}
+                          {...register('parentId')}
                         >
                           <option value="">{t('customers.noParent')}</option>
                           {parentOptions.map((opt) => (
@@ -378,7 +404,7 @@ export function CustomerModal({ open, onClose, editId, licenseTypes, licenseVers
                             licenseTypeId: '',
                             versionId: '',
                             OrgName: '',
-                            MaxConnCount: undefined,
+                            MaxConnCount: 0,
                             hwid: '',
                             track: false,
                             isBlocked: false,
@@ -405,7 +431,7 @@ export function CustomerModal({ open, onClose, editId, licenseTypes, licenseVers
           open={groupModalOpen}
           onClose={() => setGroupModalOpen(false)}
           onCreated={(id) => {
-            methods.setValue('parent_id', id);
+            methods.setValue('parentId', id);
             setGroupModalOpen(false);
           }}
           allTags={allTags}

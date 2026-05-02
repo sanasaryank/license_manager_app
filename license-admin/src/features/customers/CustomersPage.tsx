@@ -3,11 +3,12 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { queryKeys } from '../../queryKeys';
-import { getCustomers, updateCustomer, downloadLicense } from '../../api/customers';
+import { getCustomers, updateCustomer, downloadLicense, blockCustomer } from '../../api/customers';
 import { getLicenseTypes } from '../../api/licenseTypes';
 import { getLicenseVersions } from '../../api/licenseVersions';
 import { getCustomerTags } from '../../api/customerTags';
 import { getEmployees } from '../../api/employees';
+import { getCustomerStatuses } from '../../api/customerStatuses';
 import { useListOperations } from '../../hooks/useListOperations';
 import { useBlockToggle } from '../../hooks/useBlockToggle';
 import { useAuth } from '../../providers/AuthProvider';
@@ -23,7 +24,7 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Badge } from '../../components/ui/Badge';
 import { RowActions } from '../../components/ui/RowActions';
-import { IconPlus, IconList, IconTree, IconDownload } from '../../components/ui/Icons';
+import { IconPlus, IconList, IconTree, IconDownload, IconDocumentText } from '../../components/ui/Icons';
 import { ROUTES } from '../../constants/routes';
 import type { CustomerListItem } from '../../types/customer';
 import { buildTree, computeVisibleIds, flattenTree, makeTreeSortFn } from '../../utils/customerTree';
@@ -62,6 +63,17 @@ export default function CustomersPage() {
     queryKey: queryKeys.employees.all,
     queryFn: getEmployees,
   });
+
+  const { data: customerStatuses = [] } = useQuery({
+    queryKey: queryKeys.customerStatuses.all,
+    queryFn: getCustomerStatuses,
+  });
+
+  // Build statusId → status map for column rendering
+  const statusMap = React.useMemo(
+    () => new Map(customerStatuses.map((s) => [s.id, s])),
+    [customerStatuses],
+  );
 
   // Build employeeId → display name map
   const employeeMap = React.useMemo(
@@ -178,7 +190,7 @@ export default function CustomersPage() {
   });
 
   const blockToggle = useBlockToggle({
-    updateFn: (id, payload) => updateCustomer(id, payload),
+    blockFn: blockCustomer,
     listQueryKey: queryKeys.customers.all,
   });
 
@@ -239,7 +251,7 @@ export default function CustomersPage() {
     const parentMap = new Map<string, string | null>();
     for (const c of customers) {
       nameMap.set(c.id, resolveTranslation(c.name, lang));
-      parentMap.set(c.id, c.parent_id ?? null);
+      parentMap.set(c.id, c.parentId ?? null);
     }
     const resolve = (id: string): string => {
       const pid = parentMap.get(id);
@@ -288,8 +300,25 @@ export default function CustomersPage() {
       render: (c: CustomerListItem) => <TagChip tagIds={c.tags ?? []} allTags={allTags} />,
     },
     {
+      key: 'status',
+      header: t('customers.status'),
+      render: (c: CustomerListItem) => {
+        if (!c.statusId) return <span className="text-gray-300">—</span>;
+        const s = statusMap.get(c.statusId);
+        if (!s) return <span className="font-mono text-xs text-gray-400">{c.statusId}</span>;
+        return (
+          <span
+            className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium text-white"
+            style={{ backgroundColor: s.color }}
+          >
+            {resolveTranslation(s.name, lang)}
+          </span>
+        );
+      },
+    },
+    {
       key: 'isBlocked',
-      header: t('common.status'),
+      header: t('common.blocked'),
       render: (c: CustomerListItem) =>
         c.isBlocked ? (
           <Badge variant="danger">{t('common.blocked')}</Badge>
@@ -332,7 +361,7 @@ export default function CustomersPage() {
               : { type: 'block', onClick: () => blockToggle.mutate({ id: c.id, isBlocked: true }) },
             {
               type: 'history',
-              onClick: () => navigate(`${ROUTES.HISTORY}?objectId=${encodeURIComponent(c.id)}`),
+              onClick: () => navigate(`${ROUTES.HISTORY}?customer=${encodeURIComponent(c.id)}`),
             },
             ...(( c.type ?? 'customer') !== 'group' ? [{
               type: 'custom' as const,
@@ -340,6 +369,11 @@ export default function CustomersPage() {
               disabled: downloadingIds.has(c.id),
               label: t('customers.downloadLicense'),
               icon: <IconDownload />,
+            }, {
+              type: 'custom' as const,
+              onClick: () => navigate(`${ROUTES.HISTORY_LICENSES}?customerId=${encodeURIComponent(c.id)}`),
+              label: t('customers.showLicenses'),
+              icon: <IconDocumentText />,
             }] : []),
           ]}
         />
@@ -426,6 +460,7 @@ export default function CustomersPage() {
             licenseTypes={licenseTypes}
             allTags={allTags}
             employeeMap={employeeMap}
+            statusMap={statusMap}
             onEdit={(id) => { setEditId(id); setModalOpen(true); }}
             onBlockToggle={(id, isBlocked) => blockToggle.mutate({ id, isBlocked })}
             onDownloadLicense={handleDownloadLicense}

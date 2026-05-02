@@ -10,11 +10,12 @@ export function AppShell() {
   const { pathname } = useLocation();
   const hasFilters = !!FILTER_CONFIGS[pathname]?.length;
   const [filterOpen, setFilterOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   return (
     <FilterProvider>
       <div className="flex h-screen overflow-hidden">
-        <Sidebar />
+        <Sidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed((v) => !v)} />
         <div className="flex flex-1 flex-col overflow-hidden">
           <TopBar
             showFilterToggle={hasFilters}

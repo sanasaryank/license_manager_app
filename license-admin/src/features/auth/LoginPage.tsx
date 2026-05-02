@@ -49,6 +49,7 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100 p-4">
       <div className="w-full max-w-sm rounded-xl bg-white p-8 shadow-lg">
+        <img src="/triosoftlogo.svg" alt="Triosoft" className="mx-auto mb-4 h-10 w-auto" />
         <h1 className="mb-6 text-2xl font-bold text-gray-900 text-center">License Admin</h1>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">

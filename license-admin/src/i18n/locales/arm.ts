@@ -29,6 +29,7 @@ const arm = {
     resetFilters: 'Վերակայել զտիչները',
     clearSearch: 'Մաքրել որոնումը',
     all: 'Բոլորը',
+    none: 'Չկա',
     backToList: 'Վերադառնալ ցանկին',
     selectLanguage: 'Լեզու',
     rowsPerPage: 'Տողեր մեկ էջում',
@@ -60,11 +61,14 @@ const arm = {
     customerTags: 'Հաճախորդների պիտակներ',
     licenseTypes: 'Լիցենզիաների տեսակներ',
     licenseVersions: 'Լիցենզիաների տարբերակներ',
+    customerStatuses: 'Հաճախորդների կարգավիճակներ',
     history: 'Պատմություն',
     historyActions: 'Գործողություններ',
     historyLicenses: 'Լիցենզիաներ',
     logout: 'Ելք',
     validators: 'Վալիդատորներ',
+    collapseSidebar: 'Ծալել ընտրացանկը',
+    expandSidebar: 'Բացել ընտրացանկը',
   },
 
   translation: {
@@ -185,7 +189,9 @@ const arm = {
     downloadLicenseSelectTitle: 'Ընտրել լիցենզիա',
     downloadLicenseSelectPrompt: 'Հաճախորդը ունի մի քանի լիցենզիա: Ընտրեք մեկ լիցենզիան ներբեռնելու համար:',
     downloadLicenseNoLicenses: 'Հաճախորդը չունի լիցենզիաներ:',
+    showLicenses: 'Լիցենզիաների հարցումների պատմություն',
     licenseVersion: 'Տարբերակ',
+    status: 'Կարգավիճակ',
   },
 
   history: {
@@ -197,6 +203,7 @@ const arm = {
     actionType: 'Գործողություն',
     objectType: 'Օբյեկտի տեսակ',
     objectId: 'Օբյեկտի ID',
+    customer: 'Հաճախորդ',
     details: 'Փոփոխությունների մանրամասներ',
     noChanges: 'Փոփոխություններ չեն գրանցվել',
     oldValue: 'Հին արժեք',
@@ -267,6 +274,13 @@ const arm = {
     title: 'Լիցենզիաների տարբերակներ',
     createTitle: 'Ստեղծել լիցենզիայի տարբերակ',
     editTitle: 'Խմբագրել լիցենզիայի տարբերակը',
+  },
+
+  customerStatuses: {
+    title: 'Հաճախորդների կարգավիճակներ',
+    createTitle: 'Ստեղծել հաճախորդի կարգավիճակ',
+    editTitle: 'Խմբագրել հաճախորդի կարգավիճակը',
+    color: 'Գույն',
   },
 
   errors: {

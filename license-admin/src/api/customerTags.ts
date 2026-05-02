@@ -1,4 +1,4 @@
-import { get, post, put } from './client';
+import { get, post, put, patch } from './client';
 import { ENDPOINTS } from '../constants/endpoints';
 import type {
   CustomerTagListItem,
@@ -22,4 +22,8 @@ export async function createCustomerTag(payload: CustomerTagCreatePayload): Prom
 
 export async function updateCustomerTag(id: string, payload: CustomerTagUpdatePayload): Promise<CustomerTagDetail> {
   return put<CustomerTagDetail>(`${ENDPOINTS.CUSTOMER_TAGS}/${id}`, payload);
+}
+
+export async function blockCustomerTag(payload: { id: string; isBlocked: boolean }): Promise<void> {
+  return patch<void>(ENDPOINTS.CUSTOMER_TAGS, payload);
 }

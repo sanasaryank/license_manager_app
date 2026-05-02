@@ -5,6 +5,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { queryKeys } from '../../../queryKeys';
 import { getHistoryByDate } from '../../../api/history';
 import { getEmployees } from '../../../api/employees';
+import { getCustomers } from '../../../api/customers';
 import { ROUTES } from '../../../constants/routes';
 import { useListOperations } from '../../../hooks/useListOperations';
 import { useAuth } from '../../../providers/AuthProvider';
@@ -30,6 +31,7 @@ export default function ActionsPage() {
   const { lang } = useAuth();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const urlCustomer = searchParams.get('customer') ?? undefined;
   const urlObjectId = searchParams.get('objectId') ?? undefined;
 
   const filterValues = useFilterValues();
@@ -41,30 +43,43 @@ export default function ActionsPage() {
   useEffect(() => {
     if (initialized.current) return;
     initialized.current = true;
-    if (!filterValues['dateFrom']) setFilterValue('dateFrom', localTodayString(-1));
+    // When opened from a customer's history, show full history from the beginning
+    const fromCustomer = Boolean(searchParams.get('customer'));
+    if (!filterValues['dateFrom']) setFilterValue('dateFrom', fromCustomer ? '2000-01-01' : localTodayString(-1));
     if (!filterValues['dateTo'])   setFilterValue('dateTo',   localTodayString(0));
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // ── Sync customer URL param into filter panel ──
+  useEffect(() => {
+    setFilterValue('customer', urlCustomer ?? '');
+  }, [urlCustomer]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // ── Sync objectId URL param into filter panel ──
   useEffect(() => {
-    setFilterValue('objectId', urlObjectId ?? '');
+    if (urlObjectId) setFilterValue('objectId', urlObjectId);
   }, [urlObjectId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── API query — only dateFrom and dateTo are sent per contract ──
+  // ── API query — dateFrom/dateTo in body; objectId (= customer filter) as query param ──
   const dateFrom    = filterValues['dateFrom'] ?? '';
   const dateTo      = filterValues['dateTo']   ?? '';
   const apiDateFrom = formatApiDate(dateFrom);
   const apiDateTo   = formatApiDate(dateTo);
+  const apiObjectId = (filterValues['customer'] ?? '').trim() || undefined;
 
   const { data: allData = [], isLoading, error } = useQuery({
-    queryKey: queryKeys.history.byDateRange(apiDateFrom, apiDateTo),
-    queryFn: () => getHistoryByDate({ dateFrom: apiDateFrom, dateTo: apiDateTo }),
+    queryKey: queryKeys.history.byDateRange(apiDateFrom, apiDateTo, apiObjectId),
+    queryFn: () => getHistoryByDate({ dateFrom: apiDateFrom, dateTo: apiDateTo, objectId: apiObjectId }),
     enabled: Boolean(apiDateFrom) && Boolean(apiDateTo),
   });
 
   const { data: employees = [] } = useQuery({
     queryKey: queryKeys.employees.all,
     queryFn: getEmployees,
+  });
+
+  const { data: customers = [] } = useQuery({
+    queryKey: queryKeys.customers.all,
+    queryFn: getCustomers,
   });
 
   const userMap = React.useMemo(
@@ -82,9 +97,17 @@ export default function ActionsPage() {
     registerFilterOptions('userName', users);
   }, [allData, employees, lang, registerFilterOptions]);
 
-  // ── Client-side filters: userName, objectType, objectId, actionType ──
+  useEffect(() => {
+    const opts = customers
+      .filter((c) => c.type !== 'group')
+      .map((c) => ({ value: c.id, label: resolveTranslation(c.name, lang) || c.id }));
+    registerFilterOptions('customer', opts);
+  }, [customers, lang, registerFilterOptions]);
+
+  // ── Client-side filters: customer, userName, objectType, objectId, actionType ──
   const filterFields = [
-    { key: 'userName',   extract: (h: HistoryListItem) => h.userId,        matchMode: 'exact' as const },
+    { key: 'customer',   extract: (h: HistoryListItem) => h.objectId ?? '',  matchMode: 'exact' as const },
+    { key: 'userName',   extract: (h: HistoryListItem) => h.userId,          matchMode: 'exact' as const },
     { key: 'objectType', extract: (h: HistoryListItem) => h.objectType },
     { key: 'objectId',   extract: (h: HistoryListItem) => String(h.objectId) },
     { key: 'actionType', extract: (h: HistoryListItem) => h.actionType,    matchMode: 'exact' as const },
@@ -130,7 +153,7 @@ export default function ActionsPage() {
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold text-gray-900">{t('history.title')}</h1>
-        {urlObjectId && (
+        {urlCustomer && (
           <Button
             variant="secondary"
             size="sm"

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 import { queryKeys } from '../../../queryKeys';
 import { getLicenseHistory } from '../../../api/licenseHistory';
 import { getCustomers } from '../../../api/customers';
@@ -21,10 +22,28 @@ import { LicenseViewModal } from './LicenseViewModal';
 export default function LicensesPage() {
   const { t } = useTranslation();
   const { lang } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const filterValues = useFilterValues();
   const setFilterValue = useSetFilterValue();
   const registerFilterOptions = useRegisterFilterOptions();
+
+  // ── Apply customerId URL param to customer filter once, then remove it from URL ──
+  useEffect(() => {
+    const urlCustomerId = searchParams.get('customerId');
+    if (!urlCustomerId) return;
+    setFilterValue('customer', urlCustomerId);
+    // Show full history for this customer from the beginning
+    setFilterValue('dateFrom', '2000-01-01');
+    setFilterValue('dateTo', localTodayString(0));
+    // Mark initialized so the default-date effect below does not overwrite
+    initialized.current = true;
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.delete('customerId');
+      return next;
+    }, { replace: true });
+  }, [searchParams.get('customerId')]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Default date filters (only on first visit; FilterProvider preserves state on return) ──
   const initialized = useRef(false);
@@ -74,15 +93,16 @@ export default function LicensesPage() {
     [employees, lang],
   );
 
-  // ── API query — only dateFrom/dateTo are sent per contract ──
+  // ── API query — dateFrom/dateTo in body; customerId as query param when set ──
   const dateFrom    = filterValues['dateFrom'] ?? '';
   const dateTo      = filterValues['dateTo']   ?? '';
   const apiDateFrom = formatApiDate(dateFrom);
   const apiDateTo   = formatApiDate(dateTo);
+  const apiCustomerId = (customerValue || customerIdValue).trim() || undefined;
 
   const { data: allData = [], isLoading, error } = useQuery({
-    queryKey: queryKeys.licenseHistory.list(apiDateFrom, apiDateTo),
-    queryFn: () => getLicenseHistory({ dateFrom: apiDateFrom, dateTo: apiDateTo }),
+    queryKey: queryKeys.licenseHistory.list(apiDateFrom, apiDateTo, apiCustomerId),
+    queryFn: () => getLicenseHistory({ dateFrom: apiDateFrom, dateTo: apiDateTo, customerId: apiCustomerId }),
     enabled: Boolean(apiDateFrom) && Boolean(apiDateTo),
   });
 

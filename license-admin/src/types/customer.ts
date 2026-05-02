@@ -29,9 +29,10 @@ export interface CustomerListItem {
   description: string;
   lastUpdated?: string;
   /** Hierarchy: null/undefined = root node */
-  parent_id?: string | null;
+  parentId?: string | null;
   /** 'group' nodes have no licenses/responsible/TIN */
   type?: CustomerNodeType;
+  statusId?: string | null;
 }
 
 export interface CustomerDetail extends CustomerListItem {
@@ -48,8 +49,9 @@ export interface CustomerCreatePayload {
   licenses: CustomerLicense[];
   isBlocked: boolean;
   description: string;
-  parent_id?: string | null;
+  parentId?: string | null;
   type?: CustomerNodeType;
+  statusId?: string | null;
 }
 
 export interface CustomerUpdatePayload {
@@ -63,5 +65,6 @@ export interface CustomerUpdatePayload {
   licenses?: CustomerLicense[];
   isBlocked?: boolean;
   description?: string;
-  parent_id?: string | null;
+  parentId?: string | null;
+  statusId?: string | null;
 }

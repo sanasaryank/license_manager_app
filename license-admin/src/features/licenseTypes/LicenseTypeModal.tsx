@@ -33,7 +33,7 @@ const fieldSchema = z.object({
 
 const schema = z.object({
   name: z.object({ ARM: z.string().default(''), ENG: z.string().default(''), RUS: z.string().default('') }),
-  description: z.string().optional(),
+  description: z.string().default(''),
   isBlocked: z.boolean().default(false),
   fields: z.array(fieldSchema).default([]),
 });

@@ -4,10 +4,12 @@ import type { HistoryListItem, HistoryDetails, HistoryFilter } from '../types/hi
 
 /**
  * POST /history — fetch actions by date range.
- * Only dateFrom and dateTo are sent per the API contract.
+ * Only dateFrom and dateTo are sent in the body; optional objectId goes as a query param.
  */
 export async function getHistoryByDate(filter: HistoryFilter): Promise<HistoryListItem[]> {
-  const result = await post<unknown>(ENDPOINTS.HISTORY, filter);
+  const { objectId, ...body } = filter;
+  const query = objectId ? `?objectId=${encodeURIComponent(objectId)}` : '';
+  const result = await post<unknown>(`${ENDPOINTS.HISTORY}${query}`, body);
   return Array.isArray(result) ? (result as HistoryListItem[]) : [];
 }
 

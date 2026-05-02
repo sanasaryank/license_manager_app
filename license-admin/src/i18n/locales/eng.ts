@@ -29,6 +29,7 @@ const eng = {
     resetFilters: 'Reset filters',
     clearSearch: 'Clear',
     all: 'All',
+    none: 'None',
     backToList: 'Back to list',
     selectLanguage: 'Language',
     rowsPerPage: 'Rows per page',
@@ -60,11 +61,14 @@ const eng = {
     customerTags: 'Customer Tags',
     licenseTypes: 'License Types',
     licenseVersions: 'License Versions',
+    customerStatuses: 'Customer Statuses',
     history: 'History',
     historyActions: 'Actions',
     historyLicenses: 'Licenses',
     logout: 'Logout',
     validators: 'Validators',
+    collapseSidebar: 'Collapse menu',
+    expandSidebar: 'Expand menu',
   },
 
   translation: {
@@ -189,6 +193,8 @@ const eng = {
     downloadLicenseSelectPrompt: 'This customer has multiple licenses. Select one to download.',
     downloadLicenseNoLicenses: 'This customer has no licenses.',
     licenseVersion: 'Version',
+    showLicenses: 'License requests history',
+    status: 'Status',
   },
 
   history: {
@@ -200,6 +206,7 @@ const eng = {
     actionType: 'Action',
     objectType: 'Object Type',
     objectId: 'Object ID',
+    customer: 'Customer',
     details: 'History Details',
     noChanges: 'No changes recorded',
     oldValue: 'Old Value',
@@ -270,6 +277,13 @@ const eng = {
     title: 'License Versions',
     createTitle: 'Create License Version',
     editTitle: 'Edit License Version',
+  },
+
+  customerStatuses: {
+    title: 'Customer Statuses',
+    createTitle: 'Create Customer Status',
+    editTitle: 'Edit Customer Status',
+    color: 'Color',
   },
 
   errors: {

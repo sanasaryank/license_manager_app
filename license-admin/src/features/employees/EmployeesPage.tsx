@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { queryKeys } from '../../queryKeys';
-import { getEmployees, updateEmployee } from '../../api/employees';
+import { getEmployees, blockEmployee } from '../../api/employees';
 import { useListOperations } from '../../hooks/useListOperations';
 import { useBlockToggle } from '../../hooks/useBlockToggle';
 import { useAuth } from '../../providers/AuthProvider';
@@ -47,7 +47,7 @@ export default function EmployeesPage() {
   });
 
   const blockToggle = useBlockToggle({
-    updateFn: (id, payload) => updateEmployee(id, payload),
+    blockFn: blockEmployee,
     listQueryKey: queryKeys.employees.all,
   });
 
@@ -69,7 +69,7 @@ export default function EmployeesPage() {
     },
     {
       key: 'isBlocked',
-      header: t('common.status'),
+      header: t('common.blocked'),
       render: (e: EmployeeListItem) =>
         e.isBlocked ? (
           <Badge variant="danger">{t('common.blocked')}</Badge>

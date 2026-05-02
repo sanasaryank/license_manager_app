@@ -47,14 +47,13 @@ const PREVIEW_OPTIONS: { value: PreviewMode; label: string }[] = [
 
 interface ValidatorModalProps {
   editId: string | null;
-  copyFromId?: string | null;
   onClose: () => void;
 }
 
-export default function ValidatorModal({ editId, copyFromId, onClose }: ValidatorModalProps) {
+export default function ValidatorModal({ editId, onClose }: ValidatorModalProps) {
   const { t } = useTranslation();
-  const isEdit = editId !== null && !copyFromId;
-  const sourceId = isEdit ? editId : copyFromId;
+  const isEdit = editId !== null;
+  const sourceId = editId;
   const [previewMode, setPreviewMode] = useState<PreviewMode>('base');
 
   const { data: existing, isLoading: loadingItem } = useQuery({
@@ -98,6 +97,7 @@ export default function ValidatorModal({ editId, copyFromId, onClose }: Validato
         method_rules: v.method_rules as MethodRules,
       }),
       updateFn: (v) => updateValidator((existing as ValidatorItem).id, {
+        id:           (existing as ValidatorItem).id,
         version:      v.version,
         endpoint:     v.endpoint,
         schema:       v.schema as SchemaNode,
@@ -145,7 +145,7 @@ export default function ValidatorModal({ editId, copyFromId, onClose }: Validato
         </>
       }
     >
-      {(isEdit || copyFromId) && loadingItem ? (
+      {isEdit && loadingItem ? (
         <div className="flex justify-center py-8"><Spinner /></div>
       ) : (
         <form
